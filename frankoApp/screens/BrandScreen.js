@@ -76,13 +76,17 @@ const BrandScreen = () => {
         <Text style={styles.productName} numberOfLines={1}>
           {item.productName}
         </Text>
+<<<<<<< HEAD
 
+=======
+>>>>>>> 4418917 (Initial commit)
         <View style={styles.priceContainer}>
           <Text style={styles.productPrice}>{`₵${formatPrice(item.price)}`}.00</Text>
           {item.oldPrice > 0 && (
             <Text style={styles.oldPrice}>{`₵${formatPrice(item.oldPrice)}`}</Text>
           )}
         </View>
+<<<<<<< HEAD
         <View style={styles.showroomButtonContainer}>
           <TouchableOpacity style={styles.showroomButton}>
             <Text style={styles.showroomButtonText}>{item.showRoomName}</Text>
@@ -94,6 +98,9 @@ const BrandScreen = () => {
         />
       </TouchableOpacity>
 
+=======
+      </TouchableOpacity>
+>>>>>>> 4418917 (Initial commit)
     );
   };
 
@@ -187,7 +194,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: screenWidth > 600 ? 20 : 10,
     paddingVertical: 10,
     backgroundColor: '#f7f7f7',
+<<<<<<< HEAD
     marginBottom: 60,
+=======
+>>>>>>> 4418917 (Initial commit)
   },
   header: {
     flexDirection: 'row',
@@ -271,6 +281,10 @@ const styles = StyleSheet.create({
       shadowOpacity: 0.8,
       shadowRadius: 2,
       elevation: 5,
+<<<<<<< HEAD
+=======
+      alignItems: 'center',
+>>>>>>> 4418917 (Initial commit)
       maxWidth: '48%',
     },
     discountBadge: {
@@ -302,12 +316,21 @@ const styles = StyleSheet.create({
       fontSize: screenWidth > 600 ? 16 : 14,
       fontWeight: 'bold',
       marginTop: 10,
+<<<<<<< HEAD
      
       
     },
     priceContainer: {
       flexDirection: 'row',
      
+=======
+      textAlign: 'center',
+    },
+    priceContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+>>>>>>> 4418917 (Initial commit)
     },
     productPrice: {
       fontSize: 14,
@@ -315,11 +338,16 @@ const styles = StyleSheet.create({
       fontWeight: 'bold',
     },
     oldPrice: {
+<<<<<<< HEAD
       fontSize: 12,
+=======
+      fontSize: 14,
+>>>>>>> 4418917 (Initial commit)
       color: '#777',
       textDecorationLine: 'line-through',
       marginLeft: 8,
     },
+<<<<<<< HEAD
     frankoLogo: {
       position: "absolute",
       bottom: 2,
@@ -343,6 +371,8 @@ const styles = StyleSheet.create({
       fontSize: 10,
       fontWeight: "bold",
     },
+=======
+>>>>>>> 4418917 (Initial commit)
     loader: {
       flex: 1,
       justifyContent: 'center',

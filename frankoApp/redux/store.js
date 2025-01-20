@@ -9,7 +9,10 @@ import cartReducer from './slice/cartSlice';
 import customerReducer from './slice/customerSlice';
 import orderReducer from './slice/orderSlice';
 import shippingReducer from './slice/shippingSlice';
+<<<<<<< HEAD
 import showroomReducer from "./slice/showroomSlice"
+=======
+>>>>>>> 4418917 (Initial commit)
 
 // Persist configuration
 const persistConfig = {
@@ -22,7 +25,11 @@ const rootReducer = combineReducers({
   categories: categoryReducer,
   products: productReducer,
   brands: brandReducer,
+<<<<<<< HEAD
 showrooms: showroomReducer,
+=======
+
+>>>>>>> 4418917 (Initial commit)
   cart: cartReducer,
   customer: customerReducer,
   order: orderReducer,

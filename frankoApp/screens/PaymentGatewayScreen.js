@@ -3,7 +3,11 @@ import { View, ActivityIndicator, StyleSheet, Alert, BackHandler } from "react-n
 import { WebView } from "react-native-webview";
 
 const PaymentGatewayScreen = ({ route, navigation }) => {
+<<<<<<< HEAD
   const { url } = route.params; // Payment gateway URL
+=======
+  const { url } = route.params; // The payment gateway URL passed from the previous screen.
+>>>>>>> 4418917 (Initial commit)
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -25,6 +29,7 @@ const PaymentGatewayScreen = ({ route, navigation }) => {
   }, [navigation]);
 
   const handleNavigationStateChange = (navState) => {
+<<<<<<< HEAD
     const { url } = navState;
     console.log("Navigated to URL:", url); // Debugging
 
@@ -38,6 +43,14 @@ const PaymentGatewayScreen = ({ route, navigation }) => {
       console.log("Callback URL triggered:", url);
     } else {
       console.log("Unhandled URL:", url);
+=======
+    if (navState.url.includes("order-success")) {
+      Alert.alert("Success", "Payment was successful!");
+      navigation.navigate("OrderPlacedScreen");
+    } else if (navState.url.includes("order-cancelled")) {
+      Alert.alert("Cancelled", "Payment was cancelled.");
+      navigation.goBack();
+>>>>>>> 4418917 (Initial commit)
     }
   };
 

@@ -67,6 +67,7 @@ export const fetchProductById = createAsyncThunk('products/fetchProductById', as
     throw error;
   }
 });
+<<<<<<< HEAD
 export const fetchPaginatedProducts = createAsyncThunk(
   'products/fetchPaginatedProducts',
   async ({ pageNumber, pageSize = 24 }, { rejectWithValue }) => {
@@ -114,15 +115,23 @@ export const fetchProductByShowroomAndRecord = createAsyncThunk(
       }
     }
   );
+=======
+>>>>>>> 4418917 (Initial commit)
 
 // Create the product slice
 const productSlice = createSlice({
   name: 'products',
   initialState: {
     products: [],
+<<<<<<< HEAD
     filteredProducts: [],
     productsByShowroom: {},
     productsByCategory: {},
+=======
+
+    filteredProducts: [],
+    productsByShowroom: {},
+>>>>>>> 4418917 (Initial commit)
     currentProduct: null,
     loading: false,
     error: null,
@@ -211,6 +220,7 @@ const productSlice = createSlice({
         state.loading = false;
         state.error = action.error.message;
       })
+<<<<<<< HEAD
       .addCase(fetchProductsByCategory.pending, (state) => {
         state.loading = true;
       })
@@ -260,6 +270,8 @@ const productSlice = createSlice({
         state.error = action.error.message;
       });
       
+=======
+>>>>>>> 4418917 (Initial commit)
       },
 });
 // Export the reducer and actions

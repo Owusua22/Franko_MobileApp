@@ -30,7 +30,10 @@ const SignupScreen = () => {
     address: '',
     password: '',
     accountType: 'customer', // Default account type
+<<<<<<< HEAD
     accountStatus: '1', // Default account status (active) when signing up
+=======
+>>>>>>> 4418917 (Initial commit)
   });
   const [loading, setLoading] = useState(false);
 
@@ -39,7 +42,10 @@ const SignupScreen = () => {
     setFormData((prevState) => ({
       ...prevState,
       customerAccountNumber: accountNumber,
+<<<<<<< HEAD
       accountStatus: '1', // Default account status (active) when signing up
+=======
+>>>>>>> 4418917 (Initial commit)
     }));
   }, []);
 

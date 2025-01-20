@@ -57,6 +57,7 @@ export const loginCustomer = createAsyncThunk(
     }
   }
 );
+<<<<<<< HEAD
 export const updateAccountStatus = createAsyncThunk(
   "customers/updateAccountStatus",
   async (_, { rejectWithValue }) => {
@@ -99,6 +100,8 @@ export const updateAccountStatus = createAsyncThunk(
   }
 );
 
+=======
+>>>>>>> 4418917 (Initial commit)
 
 // Initial state
 const initialState = {
@@ -177,6 +180,7 @@ const customerSlice = createSlice({
       .addCase(loginCustomer.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || "Login failed.";
+<<<<<<< HEAD
       })
       .addCase(updateAccountStatus.pending, (state) => {
         state.status = "loading";
@@ -189,6 +193,8 @@ const customerSlice = createSlice({
       .addCase(updateAccountStatus.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.payload || "Failed to update account status.";
+=======
+>>>>>>> 4418917 (Initial commit)
       });
   
   },

@@ -1,5 +1,8 @@
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 4418917 (Initial commit)
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -11,7 +14,12 @@ import {
   Image,
   Alert,
   StyleSheet,
+<<<<<<< HEAD
   Linking} from "react-native";
+=======
+ 
+} from "react-native";
+>>>>>>> 4418917 (Initial commit)
 import { useDispatch } from "react-redux";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
@@ -31,8 +39,12 @@ const CheckoutScreen = ({ navigation }) => {
   const [recipientAddress, setRecipientAddress] = useState("");
   const [loading, setLoading] = useState(false);
   const [shippingDetails, setShippingDetails] = useState({ locationCharge: 0 });
+<<<<<<< HEAD
   const [shippingModalVisible, setShippingModalVisible] = useState(false);
   const [manualAddressVisible, setManualAddressVisible] = useState(false);// Define state for modal visibility
+=======
+  const [isShippingModalVisible, setShippingModalVisible] = useState(false);
+>>>>>>> 4418917 (Initial commit)
 
   
 
@@ -73,11 +85,19 @@ const CheckoutScreen = ({ navigation }) => {
         Alert.alert("Error", "Please select a payment method to proceed.");
         return;
     }
+<<<<<<< HEAD
     if (!recipientAddress || recipientAddress === "Add Address") {
       Alert.alert("Error", "Please add a valid delivery address before placing your order.");
       return;
   }
   
+=======
+
+    if (!recipientAddress) {
+        Alert.alert("Error", "Please enter your delivery address to proceed.");
+        return;
+    }
+>>>>>>> 4418917 (Initial commit)
 
     if (paymentMethod === "Cash on Delivery" && shippingDetails.locationCharge === 0) {
         Alert.alert("Error", "Please select another payment method.");
@@ -184,7 +204,11 @@ const initiatePayment = async (totalAmount, cartItems, orderId) => {
     const payload = {
         totalAmount,
         description: `Payment for ${cartItems.map((item) => item.productName).join(", ")}`,
+<<<<<<< HEAD
         callbackUrl: "https://eon1b314mokendl.m.pipedream.net",
+=======
+        callbackUrl: "https://www.frankotrading.com/order-history",
+>>>>>>> 4418917 (Initial commit)
         returnUrl: `https://www.frankotrading.com/order-success/${orderId}`,
         merchantAccountNumber: "2020892",
         cancellationUrl: "https://www.frankotrading.com/order-cancelled",
@@ -217,8 +241,13 @@ const calculateTotalAmount = () => {
 };
 
 // Callback function to reload shipping details
+<<<<<<< HEAD
 const handleShippingDetailsSave = (address) => {
   setRecipientAddress(address); // Update address immediately
+=======
+const handleShippingDetailsUpdated = async (updatedDetails) => {
+  setShippingDetails(updatedDetails);
+>>>>>>> 4418917 (Initial commit)
 };
 
   // Conditionally add Cash on Delivery to available payment methods if locationCharge > 0
@@ -226,6 +255,7 @@ const handleShippingDetailsSave = (address) => {
   if (shippingDetails.locationCharge > 0 && shippingDetails.locationCharge !== "N/A") {
     availablePaymentMethods.unshift("Cash on Delivery");
   }
+<<<<<<< HEAD
   // Function to handle WhatsApp and call redirection
 const handleContact = (type) => {
   const phoneNumber = "233555939311"; // Replace with your actual number
@@ -235,6 +265,8 @@ const handleContact = (type) => {
     Linking.openURL(`tel:${phoneNumber}`);
   }
 };
+=======
+>>>>>>> 4418917 (Initial commit)
   return (
     <View style={styles.container}>
       {loading && (
@@ -272,6 +304,7 @@ const handleContact = (type) => {
                 keyboardType="phone-pad"
               />
             </View>
+<<<<<<< HEAD
             <Text style={styles.label}>Delivery Address</Text>
 <View style={styles.addressRow}>
 <TextInput
@@ -297,10 +330,27 @@ const handleContact = (type) => {
   >
     <Text style={styles.changeButtonText}>
       {recipientAddress === "Add Address" ? "Add Address" : "Change Address"}
+=======
+            <Text style={styles.label}>Recipient Address</Text>
+<View style={styles.addressRow}>
+  <TextInput
+    style={[styles.inputField, { flex: 1 }]}
+    value={recipientAddress}
+    placeholder="Enter your address"
+    editable={false} // Ensure read-only to prevent manual input
+  />
+  <TouchableOpacity
+    style={styles.changeButton}
+    onPress={() => setShippingModalVisible(true)}
+  >
+    <Text style={styles.changeButtonText}>
+      {recipientAddress === "Add Address" ? "Add Address" : "Change Address" }
+>>>>>>> 4418917 (Initial commit)
     </Text>
   </TouchableOpacity>
 </View>
 
+<<<<<<< HEAD
 {/* Note Section */}
 <Text style={styles.noteText}>
   If your address is not listed, please{" "}
@@ -346,6 +396,12 @@ const handleContact = (type) => {
 </View>
   
   <Text style={styles.label} >Order Note</Text>
+=======
+          </View>
+    
+
+  <Text style={styles} >Order Note</Text>
+>>>>>>> 4418917 (Initial commit)
         <TextInput
           style={styles.textInput}
           placeholder="Add a note for your order"
@@ -353,9 +409,17 @@ const handleContact = (type) => {
           onChangeText={setOrderNote}
         />
     </View>
+<<<<<<< HEAD
 <View style={styles.divider} />
 
 <Text style={styles.sectionHeader}>Payment Method</Text>
+=======
+
+
+        <View style={styles.divider} />
+
+        <Text style={styles.sectionHeader}>Payment Method</Text>
+>>>>>>> 4418917 (Initial commit)
 {availablePaymentMethods.map((method) => (
   <TouchableOpacity
     key={method}
@@ -414,7 +478,11 @@ const handleContact = (type) => {
     );
   })
 ) : (
+<<<<<<< HEAD
   <Text style={styles.emptyCartMessage}>No order found.</Text>
+=======
+  <Text style={styles.emptyCartMessage}>Your cart is empty.</Text>
+>>>>>>> 4418917 (Initial commit)
 )}
 
 
@@ -435,12 +503,19 @@ const handleContact = (type) => {
       </ScrollView>
 
       <ShippingComponent
+<<<<<<< HEAD
   isVisible={shippingModalVisible}
   onClose={() => setShippingModalVisible(false)}
   onShippingDetailsSave={handleShippingDetailsSave} // Pass the callback
 />
 
 
+=======
+        isVisible={isShippingModalVisible}
+        onClose={() => setShippingModalVisible(false)}
+        onShippingDetailsUpdated={handleShippingDetailsUpdated} // Pass callback
+      />
+>>>>>>> 4418917 (Initial commit)
     </View>
   );
 };
@@ -498,8 +573,13 @@ const styles = StyleSheet.create({
   addressRow: {
     flexDirection: "row",
     alignItems: "center",
+<<<<<<< HEAD
  },
    inputField: {
+=======
+  },
+  inputField: {
+>>>>>>> 4418917 (Initial commit)
     height: 40,
     borderColor: "#ccc",
     borderWidth: 1,
@@ -508,7 +588,11 @@ const styles = StyleSheet.create({
     marginRight: 10, // Add space between input and button
   },
   changeButton: {
+<<<<<<< HEAD
     backgroundColor: "#e63946",
+=======
+    backgroundColor: "#AD2831",
+>>>>>>> 4418917 (Initial commit)
     paddingVertical: 10,
     paddingHorizontal: 15,
     borderRadius: 5,
@@ -541,10 +625,15 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginVertical: 5,
     fontWeight: "bold",
+<<<<<<< HEAD
     marginLeft: 20 
 
   },
   summaryTotal: { fontSize: 16, fontWeight: "bold", marginTop: 10, color: "#e63946"},
+=======
+  },
+  summaryTotal: { fontSize: 16, fontWeight: "bold", marginTop: 10, color: "#e63946" },
+>>>>>>> 4418917 (Initial commit)
   submitButton: {
     flexDirection: "row",
     alignItems: "center",
@@ -566,6 +655,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     zIndex: 10,
   },
+<<<<<<< HEAD
   noteText: {
     color: "red",
     fontSize: 14,
@@ -606,6 +696,8 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   
+=======
+>>>>>>> 4418917 (Initial commit)
   emptyCartMessage: { fontSize: 16, textAlign: "center", marginTop: 20 },
 });
 export default CheckoutScreen;

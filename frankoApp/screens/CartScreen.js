@@ -42,6 +42,7 @@ const CartScreen = () => {
     fetchCart();
   }, [dispatch]);
 
+<<<<<<< HEAD
   const handleQuantityChange = async (cartId, productId, quantity) => {
     if (quantity < 1) {
       await dispatch(deleteCartItem({ cartId, productId }));
@@ -62,6 +63,22 @@ const CartScreen = () => {
     setDeleting(false);
   };
   
+=======
+  const handleQuantityChange = (cartId, productId, quantity) => {
+    if (quantity < 1) {
+      dispatch(deleteCartItem({ cartId, productId }));
+    } else {
+      dispatch(updateCartItem({ cartId, productId, quantity }));
+    }
+  };
+
+  const handleDeleteItem = (cartId, productId) => {
+    setDeleting(true);
+    dispatch(deleteCartItem({ cartId, productId })).finally(() => {
+      setDeleting(false);
+    });
+  };
+>>>>>>> 4418917 (Initial commit)
 
   const calculateSubtotal = () =>
     cartItems?.reduce((total, item) => total + item.price * item.quantity, 0) || 0;
