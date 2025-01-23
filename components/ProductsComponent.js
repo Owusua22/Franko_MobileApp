@@ -77,8 +77,9 @@ export default function ProductsComponent() {
 
     return (
       <TouchableOpacity
-        style={styles.productCard}
+        style={[styles.productCard]}
         onPress={() => navigation.navigate("ProductDetails", { productId: item.productID })}
+        activeOpacity={0.9}
       >
         <View style={styles.imageContainer}>
           <Image source={{ uri: productImageURL }} style={styles.productImage} />
@@ -88,6 +89,7 @@ export default function ProductsComponent() {
             </View>
           )}
         </View>
+       
         <Text style={styles.productName} numberOfLines={1}>
           {item.productName}
         </Text>
@@ -97,9 +99,19 @@ export default function ProductsComponent() {
             <Text style={styles.oldPrice}>{formatPrice(item.oldPrice)}</Text>
           )}
         </View>
+        <View style={styles.showroomButtonContainer}>
+          <TouchableOpacity style={styles.showroomButton}>
+            <Text style={styles.showroomButtonText}>{item.showRoomName}</Text>
+          </TouchableOpacity>
+        </View>
+        <Image
+          source={require("../assets/frankoIcon.png")}
+          style={styles.frankoLogo}
+        />
       </TouchableOpacity>
     );
   };
+
 
   if (loading && recentProducts.length === 0) {
     return (
@@ -170,35 +182,33 @@ const styles = StyleSheet.create({
   productCard: {
     flex: 1,
     margin: 8,
-    padding: 10,
-    borderRadius: 10,
+    padding: 12,
+    borderRadius: 15,
     backgroundColor: "#fff",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.8,
-    shadowRadius: 2,
-    elevation: 5,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 4,
     maxWidth: "48%",
+    transform: [{ scale: 1 }],
+  },
+  productCardHovered: {
+    transform: [{ scale: 1.05 }],
+  },
+  imageContainer: {
+    position: "relative",
+    marginBottom: 8,
   },
   productImage: {
-    width: 100,
-    height: 100,
+    width: "100%",
+    height: 120,
     resizeMode: "contain",
-    alignSelf: "center",
-  },
-  productName: {
-    fontSize: 13,
-    color: "#333",
-  },
-  productPrice: {
-    fontSize: 12,
-    color: "#D72638",
-    fontWeight: "bold",
   },
   discountBadge: {
     position: "absolute",
-    top: 5,
-    left: 5,
+    top: 8,
+    left: 8,
     backgroundColor: "#D72638",
     paddingHorizontal: 5,
     paddingVertical: 2,
@@ -209,15 +219,53 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: "bold",
   },
+  productName: {
+    fontSize: 14,
+    color: "#333",
+    fontWeight: "600",
+   
+  },
   priceContainer: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    marginTop: 4,
+  },
+  productPrice: {
+    fontSize: 14,
+    color: 'red',
+    fontWeight: 'bold',
   },
   oldPrice: {
-    fontSize: 10,
+    fontSize: 12,
     color: "#aaa",
     textDecorationLine: "line-through",
+  },
+  frankoLogo: {
+    position: "absolute",
+    bottom: 2,
+    right: 2,
+    width: 40,
+    height: 40,
+    resizeMode: "contain",
+  },
+  showroomButtonContainer: {
+    marginBottom: 12,
+  },
+  showroomButton: {
+    alignSelf: "flex-start",
+    backgroundColor: "#28a745",
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  showroomButtonText: {
+    color: "#fff",
+    fontSize: 10,
+    fontWeight: "bold",
+  },
+  buttonIcon: {
+    marginRight: 5,
   },
   shopNowButton: {
     flexDirection: "row",
@@ -237,4 +285,5 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "bold",
   },
+ 
 });

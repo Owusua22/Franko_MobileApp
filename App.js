@@ -27,6 +27,7 @@ import PaymentGatewayScreen from './screens/PaymentGatewayScreen';
 import OrderPlacedScreen from './screens/OrderPlacedScreen';
 import { useDispatch } from 'react-redux';
 import {fetchProduct} from './redux/slice/productSlice';
+import OrderCancellationScreen from './screens/OrderCancellationScreen';
 
 
 const Stack = createStackNavigator();
@@ -73,13 +74,14 @@ const AppStack = () => {
       <Stack.Screen name="Checkout" component={CheckoutScreen} />
       <Stack.Screen name="Category" component={CategoryScreenWithFooter} />
       <Stack.Screen name="Account" component={AccountScreenWithFooter} />
-      <Stack.Screen name="Brands" component={BrandScreen} />
+      <Stack.Screen name="Brands" component={BrandScreenWithFooter} />
       <Stack.Screen name="Notifications" component={NotificationsScreenWithFooter} />
       <Stack.Screen name="OrderReceivedScreen" component={OrderReceivedScreen} />
       <Stack.Screen name="OrderHistoryScreen" component={OrderHistoryScreen} />
       <Stack.Screen name="Products" component={ProductsScreenWithFooter} />
       <Stack.Screen name="PaymentGatewayScreen" component={PaymentGatewayScreen} />
       <Stack.Screen name = "OrderPlacedScreen" component={OrderPlacedScreen}/>
+      <Stack.Screen name ="OrderCancellationScreen" component={OrderCancellationScreen}/>
     </Stack.Navigator>
   );
 };
@@ -175,6 +177,13 @@ const NotificationsScreenWithFooter = () => (
 const CartScreenWithFooter = () => (
   <>
     <CartScreen />
+    <Footer />
+  </>
+);
+
+const BrandScreenWithFooter = () => (
+  <>
+    <BrandScreen />
     <Footer />
   </>
 );

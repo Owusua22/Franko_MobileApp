@@ -83,31 +83,32 @@ const CategoryScreen = () => {
   return (
     <View style={styles.screen}>
       <View style={styles.categoryContainer}>
-        <FlatList
-          data={categories}
-          keyExtractor={(item) => item.categoryId}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              style={[
-                styles.categoryItem,
-                selectedCategoryId === item.categoryId && styles.activeCategory,
-              ]}
-              onPress={() => {
-                setSelectedCategoryId(item.categoryId);
-                setSelectedCategoryName(item.categoryName);
-              }}
-            >
-              <Text
-                style={[
-                  styles.categoryText,
-                  selectedCategoryId === item.categoryId && styles.activeCategoryText,
-                ]}
-              >
-                {item.categoryName}
-              </Text>
-            </TouchableOpacity>
-          )}
-        />
+      <FlatList
+  data={categories.filter((item) => item.categoryName !== 'Products out of stock')}
+  keyExtractor={(item) => item.categoryId}
+  renderItem={({ item }) => (
+    <TouchableOpacity
+      style={[
+        styles.categoryItem,
+        selectedCategoryId === item.categoryId && styles.activeCategory,
+      ]}
+      onPress={() => {
+        setSelectedCategoryId(item.categoryId);
+        setSelectedCategoryName(item.categoryName);
+      }}
+    >
+      <Text
+        style={[
+          styles.categoryText,
+          selectedCategoryId === item.categoryId && styles.activeCategoryText,
+        ]}
+      >
+        {item.categoryName}
+      </Text>
+    </TouchableOpacity>
+  )}
+/>
+
       </View>
       <View style={styles.brandContainer}>
         {selectedCategoryId ? (
@@ -128,7 +129,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     backgroundColor: '#F8F9FA',
-    marginBottom: 70
+    marginBottom: 80
   },
   categoryContainer: {
     flex: 1,
