@@ -7,7 +7,7 @@ export default function BannerComponent() {
   return (
     <View style={styles.container}>
       <Image
-        source={require('../assets/bn.jpeg')} // Replace with your image URL
+        source={require('../assets/na.jpeg')} // Replace with your image URL
         style={styles.image}
       />
     
@@ -21,6 +21,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end', // Align button to the bottom
     alignItems: 'center',
     padding: 2,
+    marginTop: 10
   },
   image: {
    

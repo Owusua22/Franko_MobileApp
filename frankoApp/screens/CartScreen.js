@@ -182,13 +182,12 @@ const CartScreen = () => {
 
 const styles = StyleSheet.create({
   safeArea: { flex: 3, backgroundColor: "#f4f4f4" },
-  container: { flex: 4, padding: 20, backgroundColor: "#fff" },
+  container: { flex: 4, backgroundColor: "#fff" },
   titleContainer: {
     flexDirection: "row",
     alignItems: "center",
     padding: 10,
     backgroundColor: "#006838",
-    borderRadius: 30,
   },
   titleText: {
     color: "#fff", fontSize: 14, fontWeight: "bold", marginLeft: 10 

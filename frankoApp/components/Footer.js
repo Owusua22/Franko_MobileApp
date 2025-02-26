@@ -41,12 +41,13 @@ export default function Footer() {
 
       {/* Notifications */}
       <TouchableOpacity
-        style={[styles.footerItem, isActive('Notifications') && styles.activeTab]}
-        onPress={() => navigation.navigate('Notifications')}
-      >
-        <Ionicons name="notifications" size={24} color="white" />
-        <Text style={styles.footerText}>Notifications</Text>
-      </TouchableOpacity>
+  style={[styles.footerItem, isActive('Shops') && styles.activeTab]}
+  onPress={() => navigation.navigate('Shops')}
+>
+  <Ionicons name="storefront" size={24} color="white" />
+  <Text style={styles.footerText}>Shops</Text>
+</TouchableOpacity>
+
     </View>
   );
 }

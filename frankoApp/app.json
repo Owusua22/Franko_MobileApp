@@ -1,12 +1,13 @@
 {
   "expo": {
-    "name": "Franko Trading",
+    "name": "FrankoTrading",
     "slug": "Franko",
     "version": "53.0.1",
     "orientation": "default",
-    "icon": "./assets/frankologo1.png",
+    "icon": "./assets/frankoIcon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
+    "developmentClient": false,
     "splash": {
       "image": "./assets/frankoIcon.png",
       "resizeMode": "contain",

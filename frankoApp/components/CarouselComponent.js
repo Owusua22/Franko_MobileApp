@@ -18,19 +18,21 @@ const CarouselComponent = () => {
   return (
     <View style={styles.container}>
       {loading ? (
-        <Image source={require("../assets/bn.jpeg")} style={styles.image} />
+        <Image source={require("../assets/na.jpeg")} style={styles.image} />
       ) : advertisments.length === 0 ? (
-        <Image source={require("../assets/bn.jpeg")} style={styles.image} />
+        <Image source={require("../assets/na.jpeg")} style={styles.image} />
       ) : (
-        <Swiper
-          autoplay={advertisments.length > 1} 
-          autoplayTimeout={5}
-          loop={advertisments.length > 1}
-          index={0}
-          showsPagination={true}
-          dotStyle={styles.dot}
-          activeDotStyle={styles.activeDot}
-        >
+      <Swiper
+  autoplay={advertisments.length > 1}
+  autoplayTimeout={5}
+  loop={advertisments.length > 1}
+  index={0}
+  showsPagination={true}
+  removeClippedSubviews={false} // Prevents flickering
+  dotStyle={styles.dot}
+  activeDotStyle={styles.activeDot}
+>
+
           {advertisments.map((ad, index) => (
             <View key={index} style={styles.slide}>
               <Image

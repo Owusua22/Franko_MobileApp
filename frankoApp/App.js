@@ -17,7 +17,7 @@ import CheckoutScreen from './screens/CheckoutScreen';
 import AccountScreen from './screens/AccountScreen';
 import CategoryScreen from './screens/CategoryScreen';
 import BrandScreen from './screens/BrandScreen';
-import NotificationsScreen from './screens/NotificationsScreen';
+import NotificationsScreen from './screens/ShopScreen.js';
 import OrderReceivedScreen from './screens/OrderReceivedScreen';
 import OrderHistoryScreen from './screens/OrderHistoryScreen';
 import ProductsScreen from './screens/ProductsScreen.js';
@@ -43,6 +43,7 @@ import RecentlyViewedScreen from './screens/RecentlyViewedScreen';
 import CustomerServiceScreen from './screens/CustomerService';
 import InviteScreen from './screens/InviteScreen';
 import AddressManagementScreen from './screens/AddressManagementScreen.js';
+import ShopScreen from './screens/ShopScreen.js';
 
 
 const Stack = createStackNavigator();
@@ -88,7 +89,7 @@ const AppStack = () => {
       <Stack.Screen name="Category" component={CategoryScreenWithFooter} />
       <Stack.Screen name="Account" component={AccountScreenWithFooter} />
       <Stack.Screen name="Brands" component={BrandScreen} />
-      <Stack.Screen name="Notifications" component={NotificationsScreenWithFooter} />
+      <Stack.Screen name="Shops" component={ShopScreenWithFooter} />
       <Stack.Screen name="OrderReceivedScreen" component={OrderReceivedScreen} />
       <Stack.Screen name="OrderHistoryScreen" component={OrderHistoryScreen} />
       <Stack.Screen name="Products" component={ProductsScreenWithFooter} />
@@ -229,9 +230,9 @@ const ProductsScreenWithFooter = () => (
   </>
 );
 
-const NotificationsScreenWithFooter = () => (
+const ShopScreenWithFooter = () => (
   <>
-    <NotificationsScreen />
+    <ShopScreen/>
     <Footer />
   </>
 );

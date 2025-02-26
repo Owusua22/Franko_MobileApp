@@ -1,5 +1,7 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, Linking, TextInput, Button, FlatList, Alert, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, Linking, TextInput, Button, FlatList, Alert, StyleSheet, ScrollView,  SafeAreaView,  KeyboardAvoidingView,
+  Platform
+ } from 'react-native';
 import { MaterialIcons, AntDesign } from '@expo/vector-icons';
 
 import { Ionicons } from '@expo/vector-icons';
@@ -311,49 +313,54 @@ const ContactUsScreen = () => {
   );
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.header}>Contact Us</Text>
+    <SafeAreaView style={styles.safeArea}>
+      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.container}>
+        <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
+          <Text style={styles.header}>Contact Us</Text>
 
-      {/* Contact Information */}
-      <View style={styles.contactCard}>
-      <Ionicons name="call" size={24} color="red" />
-        <Text style={styles.contactTitle}>Call Us</Text>
-        <Text>We are available 6 days a week.</Text>
-        <TouchableOpacity onPress={() => openCall('0246422338')}>
-          <Text style={styles.link}>0246422338</Text>
-        </TouchableOpacity>
-      </View>
+          {/* Contact Information */}
+          <View style={styles.contactCard}>
+            <Ionicons name="call" size={24} color="red" />
+            <Text style={styles.contactTitle}>Call Us</Text>
+            <Text>We are available 6 days a week.</Text>
+            <TouchableOpacity onPress={() => openCall("0246422338")}>
+              <Text style={styles.link}>0246422338</Text>
+            </TouchableOpacity>
+          </View>
 
-      <View style={styles.contactCard}>
-        <MaterialIcons name="email" size={24} color="red" />
-        <Text style={styles.contactTitle}>Write To Us</Text>
-        <Text>Fill out our form and we will contact you within 24 hours.</Text>
-        <TouchableOpacity onPress={() => Linking.openURL('mailto:online@frankotrading.com')}>
-          <Text style={styles.link}>online@frankotrading.com</Text>
-        </TouchableOpacity>
-      </View>
+          <View style={styles.contactCard}>
+            <MaterialIcons name="email" size={24} color="red" />
+            <Text style={styles.contactTitle}>Write To Us</Text>
+            <Text>Fill out our form and we will contact you within 24 hours.</Text>
+            <TouchableOpacity onPress={() => Linking.openURL("mailto:online@frankotrading.com")}>
+              <Text style={styles.link}>online@frankotrading.com</Text>
+            </TouchableOpacity>
+          </View>
 
-      {/* Contact Form */}
-      <View style={styles.formContainer}>
-        <TextInput style={styles.input} placeholder="Your Name" />
-        <TextInput style={styles.input} placeholder="Your Email" keyboardType="email-address" />
-        <TextInput style={styles.input} placeholder="Your Phone" keyboardType="phone-pad" />
-        <TextInput style={[styles.input, styles.textArea]} placeholder="Your Message" multiline numberOfLines={4} />
-        <Button title="Send Message" onPress={handleFormSubmit} />
-      </View>
+          {/* Contact Form */}
+          <View style={styles.formContainer}>
+            <TextInput style={styles.input} placeholder="Your Name" />
+            <TextInput style={styles.input} placeholder="Your Email" keyboardType="email-address" />
+            <TextInput style={styles.input} placeholder="Your Phone" keyboardType="phone-pad" />
+            <TextInput style={[styles.input, styles.textArea]} placeholder="Your Message" multiline numberOfLines={4} />
+            <TouchableOpacity style={styles.button} onPress={handleFormSubmit}>
+  <MaterialIcons name="send" size={20} color="#fff" />
+  <Text style={styles.buttonText}>Send Message</Text>
+</TouchableOpacity>
+          </View>
 
-      <Text style={styles.header}>Our Locations</Text>
-      <ScrollView>
-  <FlatList
-    data={locations}
-    renderItem={renderLocation}
-    keyExtractor={(item, index) => `${item.title}-${index}`}
-    nestedScrollEnabled={true}
-  />
-</ScrollView>
+          <Text style={styles.header}>Our Shop Locations</Text>
 
-
-    </ScrollView>
+          {/* Use FlatList without nesting inside ScrollView */}
+          <FlatList
+            data={locations}
+            renderItem={renderLocation}
+            keyExtractor={(item, index) => `${item.title}-${index}`}
+            scrollEnabled={false} // Disable FlatList scrolling since ScrollView handles it
+          />
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
 
@@ -362,7 +369,7 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   header: {
-    fontSize: 24,
+    fontSize: 16,
     fontWeight: 'bold',
     color: '#D7263D',
     marginBottom: 20,
@@ -409,6 +416,21 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 10,
+  },
+  button: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#006838",
+    padding: 12,
+    borderRadius: 8,
+    marginTop: 10,
+  },
+  buttonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+    marginLeft: 8, // Spacing between icon and text
   },
 });
 
