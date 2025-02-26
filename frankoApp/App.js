@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { SafeAreaView, StyleSheet, View, Text, ActivityIndicator, Image, Easing} from 'react-native';
+import { SafeAreaView, StyleSheet, View, Text, ActivityIndicator, Image,  StatusBar} from 'react-native';
 import { Provider } from 'react-redux';
 import { store } from './redux/store';
 import { NavigationContainer } from '@react-navigation/native';
@@ -26,7 +26,18 @@ import PolicyScreen from './screens/PolicyScreen';
 import PaymentGatewayScreen from './screens/PaymentGatewayScreen';
 import OrderPlacedScreen from './screens/OrderPlacedScreen';
 import { useDispatch } from 'react-redux';
-import {fetchProduct} from './redux/slice/productSlice';
+import OrderCancellationScreen from './screens/OrderCancellationScreen';
+import AccessoriesScreen from './screens/Categories/AccessoriesScreen';
+import ShowroomScreen from './screens/ShowroomScreen';
+import PhoneScreen from './screens/Categories/PhoneScreen';
+import SpeakerScreen from './screens/Categories/SpeakerScreen';
+import AirconditionScreen from './screens/Categories/AirConditionScreen';
+import FridgeScreen from './screens/Categories/Fridge';
+import ComboScreen from './screens/Categories/ComboScreen';
+import FanScreen from './screens/Categories/Fan';
+import ComputerScreen from './screens/Categories/ComputerScreen';
+import TelevisionScreen from './screens/Categories/TelevisionScreen';
+import ApplianceScreen from './screens/Categories/ApplianceScreen';
 
 
 const Stack = createStackNavigator();
@@ -38,17 +49,16 @@ const WelcomeScreen = ({ onReady }) => {
   useEffect(() => {
     const fetchData = async () => {
       await Promise.all([
-        new Promise((resolve) => setTimeout(resolve)), // Simulated delay
-        dispatch(fetchProduct()) // Fetch products
+        new Promise((resolve) => setTimeout(resolve, 2000)), // 3-second delay
       ]);
-
+  
       setLoading(false);
       onReady(); // Navigate to the home screen
     };
-
+  
     fetchData();
   }, [dispatch, onReady]);
-
+  
   return (
     <View style={styles.welcomeContainer}>
       <Image
@@ -73,13 +83,26 @@ const AppStack = () => {
       <Stack.Screen name="Checkout" component={CheckoutScreen} />
       <Stack.Screen name="Category" component={CategoryScreenWithFooter} />
       <Stack.Screen name="Account" component={AccountScreenWithFooter} />
-      <Stack.Screen name="Brands" component={BrandScreen} />
+      <Stack.Screen name="Brands" component={BrandScreenWithFooter} />
       <Stack.Screen name="Notifications" component={NotificationsScreenWithFooter} />
       <Stack.Screen name="OrderReceivedScreen" component={OrderReceivedScreen} />
       <Stack.Screen name="OrderHistoryScreen" component={OrderHistoryScreen} />
       <Stack.Screen name="Products" component={ProductsScreenWithFooter} />
       <Stack.Screen name="PaymentGatewayScreen" component={PaymentGatewayScreen} />
       <Stack.Screen name = "OrderPlacedScreen" component={OrderPlacedScreen}/>
+      <Stack.Screen name ="OrderCancellationScreen" component={OrderCancellationScreen}/>
+      <Stack.Screen name="showroom" component={ShowroomScreen} />
+      <Stack.Screen name="Accessories" component={AccessoriesScreen} />
+      <Stack.Screen name ="Phones" component= {PhoneScreen}/>  
+      <Stack.Screen name = "Television" component = {TelevisionScreen}/>
+  <Stack.Screen name = "Speakers" component = {SpeakerScreen}/>
+      <Stack.Screen name = "Appliances" component = {ApplianceScreen}/>   
+      <Stack.Screen name= "AirCondition" component = {AirconditionScreen}/>
+      <Stack.Screen name = "Fridge" component = {FridgeScreen}/>
+      <Stack.Screen name = "Combo" component={ComboScreen}/>
+      <Stack.Screen name = "Fan" component= {FanScreen}/>
+      <Stack.Screen name = "Computers" component = {ComputerScreen}/>
+
     </Stack.Navigator>
   );
 };
@@ -121,6 +144,8 @@ const App = () => {
     <Provider store={store}>
       <NavigationContainer>
         <SafeAreaView style={styles.container}>
+        <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
+      
           {showWelcome ? (
             <WelcomeScreen onReady={handleReady} />
           ) : (
@@ -179,11 +204,19 @@ const CartScreenWithFooter = () => (
   </>
 );
 
+const BrandScreenWithFooter = () => (
+  <>
+    <BrandScreen />
+    <Footer />
+  </>
+);
+
 export default App;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#fff',
   
   },
   contentContainer: {

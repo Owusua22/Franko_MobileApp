@@ -30,6 +30,7 @@ const SignupScreen = () => {
     address: '',
     password: '',
     accountType: 'customer', // Default account type
+    accountStatus: '1', // Default account status (active) when signing up
   });
   const [loading, setLoading] = useState(false);
 
@@ -38,6 +39,7 @@ const SignupScreen = () => {
     setFormData((prevState) => ({
       ...prevState,
       customerAccountNumber: accountNumber,
+      accountStatus: '1', // Default account status (active) when signing up
     }));
   }, []);
 

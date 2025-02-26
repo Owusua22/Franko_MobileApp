@@ -1,4 +1,5 @@
 
+
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -10,8 +11,7 @@ import {
   Image,
   Alert,
   StyleSheet,
- 
-} from "react-native";
+  Linking} from "react-native";
 import { useDispatch } from "react-redux";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
@@ -31,7 +31,8 @@ const CheckoutScreen = ({ navigation }) => {
   const [recipientAddress, setRecipientAddress] = useState("");
   const [loading, setLoading] = useState(false);
   const [shippingDetails, setShippingDetails] = useState({ locationCharge: 0 });
-  const [isShippingModalVisible, setShippingModalVisible] = useState(false);
+  const [shippingModalVisible, setShippingModalVisible] = useState(false);
+  const [manualAddressVisible, setManualAddressVisible] = useState(false);// Define state for modal visibility
 
   
 
@@ -72,11 +73,11 @@ const CheckoutScreen = ({ navigation }) => {
         Alert.alert("Error", "Please select a payment method to proceed.");
         return;
     }
-
-    if (!recipientAddress) {
-        Alert.alert("Error", "Please enter your delivery address to proceed.");
-        return;
-    }
+    if (!recipientAddress || recipientAddress === "Add Address") {
+      Alert.alert("Error", "Please add a valid delivery address before placing your order.");
+      return;
+  }
+  
 
     if (paymentMethod === "Cash on Delivery" && shippingDetails.locationCharge === 0) {
         Alert.alert("Error", "Please select another payment method.");
@@ -183,7 +184,7 @@ const initiatePayment = async (totalAmount, cartItems, orderId) => {
     const payload = {
         totalAmount,
         description: `Payment for ${cartItems.map((item) => item.productName).join(", ")}`,
-        callbackUrl: "https://www.frankotrading.com/order-history",
+        callbackUrl: "https://eon1b314mokendl.m.pipedream.net",
         returnUrl: `https://www.frankotrading.com/order-success/${orderId}`,
         merchantAccountNumber: "2020892",
         cancellationUrl: "https://www.frankotrading.com/order-cancelled",
@@ -216,8 +217,8 @@ const calculateTotalAmount = () => {
 };
 
 // Callback function to reload shipping details
-const handleShippingDetailsUpdated = async (updatedDetails) => {
-  setShippingDetails(updatedDetails);
+const handleShippingDetailsSave = (address) => {
+  setRecipientAddress(address); // Update address immediately
 };
 
   // Conditionally add Cash on Delivery to available payment methods if locationCharge > 0
@@ -225,6 +226,15 @@ const handleShippingDetailsUpdated = async (updatedDetails) => {
   if (shippingDetails.locationCharge > 0 && shippingDetails.locationCharge !== "N/A") {
     availablePaymentMethods.unshift("Cash on Delivery");
   }
+  // Function to handle WhatsApp and call redirection
+const handleContact = (type) => {
+  const phoneNumber = "233555939311"; // Replace with your actual number
+  if (type === "whatsapp") {
+    Linking.openURL(`https://wa.me/${phoneNumber}`);
+  } else if (type === "call") {
+    Linking.openURL(`tel:${phoneNumber}`);
+  }
+};
   return (
     <View style={styles.container}>
       {loading && (
@@ -262,28 +272,80 @@ const handleShippingDetailsUpdated = async (updatedDetails) => {
                 keyboardType="phone-pad"
               />
             </View>
-            <Text style={styles.label}>Recipient Address</Text>
+            <Text style={styles.label}>Delivery Address</Text>
 <View style={styles.addressRow}>
-  <TextInput
-    style={[styles.inputField, { flex: 1 }]}
-    value={recipientAddress}
-    placeholder="Enter your address"
-    editable={false} // Ensure read-only to prevent manual input
-  />
+<TextInput
+  style={[styles.inputField, { flex: 1 }]}
+  value={recipientAddress && recipientAddress !== "Add Address" ? recipientAddress : ""}
+  placeholder="Click on the button to add address"
+  editable={false} // Read-only to prevent manual input
+/>
+
   <TouchableOpacity
     style={styles.changeButton}
-    onPress={() => setShippingModalVisible(true)}
+    onPress={() => {
+      if (!recipientAddress || recipientAddress === "click on the button to add address") {
+        Alert.alert(
+          "No Address Found",
+          "Please add a delivery address. If your address is not listed, you can call or WhatsApp us to place your order",
+          [{ text: "OK" }]
+        );
+      } else {
+        setShippingModalVisible(true);
+      }
+    }}
   >
     <Text style={styles.changeButtonText}>
-      {recipientAddress === "Add Address" ? "Add Address" : "Change Address" }
+      {recipientAddress === "Add Address" ? "Add Address" : "Change Address"}
     </Text>
   </TouchableOpacity>
 </View>
 
-          </View>
-    
+{/* Note Section */}
+<Text style={styles.noteText}>
+  If your address is not listed, please{" "}
+  <Text style={styles.linkText} onPress={() => handleContact("whatsapp")}>
+    WhatsApp
+  </Text>{" "}
+  or{" "}
+  <Text style={styles.linkText} onPress={() => handleContact("call")}>
+    Call us
+  </Text>{" "}
+   to place your order or{" "}
+  <Text
+    style={styles.linkText}
+    onPress={() => setManualAddressVisible(!manualAddressVisible)} // Toggle input field
+  >
+   click here to enter your address below.
+  </Text>
+ 
+</Text>
 
-  <Text style={styles} >Order Note</Text>
+{/* Show Button When Clicked */}
+{manualAddressVisible && (
+  <TouchableOpacity
+    style={styles.manualAddressButton}
+    onPress={() => setManualAddressVisible(false)} // Hide input when clicked again
+  >
+    <Text style={styles.manualAddressButtonText}>Enter Address Manually</Text>
+  </TouchableOpacity>
+)}
+
+{/* Conditionally Show Address Input Field */}
+{manualAddressVisible && (
+  <View style={styles.addressInputContainer}>
+    <TextInput
+      style={styles.inputField}
+      placeholder="Enter your address"
+      value={recipientAddress}
+      onChangeText={setRecipientAddress} // Update address on input change
+    />
+  </View>
+)}
+
+</View>
+  
+  <Text style={styles.label} >Order Note</Text>
         <TextInput
           style={styles.textInput}
           placeholder="Add a note for your order"
@@ -291,11 +353,9 @@ const handleShippingDetailsUpdated = async (updatedDetails) => {
           onChangeText={setOrderNote}
         />
     </View>
+<View style={styles.divider} />
 
-
-        <View style={styles.divider} />
-
-        <Text style={styles.sectionHeader}>Payment Method</Text>
+<Text style={styles.sectionHeader}>Payment Method</Text>
 {availablePaymentMethods.map((method) => (
   <TouchableOpacity
     key={method}
@@ -354,7 +414,7 @@ const handleShippingDetailsUpdated = async (updatedDetails) => {
     );
   })
 ) : (
-  <Text style={styles.emptyCartMessage}>Your cart is empty.</Text>
+  <Text style={styles.emptyCartMessage}>No order found.</Text>
 )}
 
 
@@ -375,10 +435,12 @@ const handleShippingDetailsUpdated = async (updatedDetails) => {
       </ScrollView>
 
       <ShippingComponent
-        isVisible={isShippingModalVisible}
-        onClose={() => setShippingModalVisible(false)}
-        onShippingDetailsUpdated={handleShippingDetailsUpdated} // Pass callback
-      />
+  isVisible={shippingModalVisible}
+  onClose={() => setShippingModalVisible(false)}
+  onShippingDetailsSave={handleShippingDetailsSave} // Pass the callback
+/>
+
+
     </View>
   );
 };
@@ -436,8 +498,8 @@ const styles = StyleSheet.create({
   addressRow: {
     flexDirection: "row",
     alignItems: "center",
-  },
-  inputField: {
+ },
+   inputField: {
     height: 40,
     borderColor: "#ccc",
     borderWidth: 1,
@@ -446,7 +508,7 @@ const styles = StyleSheet.create({
     marginRight: 10, // Add space between input and button
   },
   changeButton: {
-    backgroundColor: "#AD2831",
+    backgroundColor: "#e63946",
     paddingVertical: 10,
     paddingHorizontal: 15,
     borderRadius: 5,
@@ -479,8 +541,10 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginVertical: 5,
     fontWeight: "bold",
+    marginLeft: 20 
+
   },
-  summaryTotal: { fontSize: 16, fontWeight: "bold", marginTop: 10, color: "#e63946" },
+  summaryTotal: { fontSize: 16, fontWeight: "bold", marginTop: 10, color: "#e63946"},
   submitButton: {
     flexDirection: "row",
     alignItems: "center",
@@ -502,6 +566,46 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     zIndex: 10,
   },
+  noteText: {
+    color: "red",
+    fontSize: 14,
+    marginTop: 10,
+    textAlign: "left",
+  },
+  
+  linkText: {
+    color: "#3185FC",
+    fontWeight: "bold",
+    textDecorationLine: "underline",
+  },
+  
+  manualAddressButton: {
+    backgroundColor: "#4CAF50",
+    padding: 10,
+    borderRadius: 5,
+    
+    marginTop: 10,
+  },
+  
+  manualAddressButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
+  },
+  
+  addressInputContainer: {
+    marginTop: 15,
+    paddingHorizontal: 20,
+  },
+  
+  inputField: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
+    padding: 10,
+    fontSize: 16,
+    width: "100%",
+  },
+  
   emptyCartMessage: { fontSize: 16, textAlign: "center", marginTop: 20 },
 });
 export default CheckoutScreen;

@@ -57,6 +57,48 @@ export const loginCustomer = createAsyncThunk(
     }
   }
 );
+export const updateAccountStatus = createAsyncThunk(
+  "customers/updateAccountStatus",
+  async (_, { rejectWithValue }) => {
+    try {
+      console.log("Fetching customer details from AsyncStorage...");
+      const customer = await AsyncStorage.getItem("customer");
+
+      if (!customer) {
+        console.error("No customer found in AsyncStorage.");
+        return rejectWithValue("No customer found.");
+      }
+
+      const parsedCustomer = JSON.parse(customer);
+      console.log("Customer details:", parsedCustomer);
+
+      const { customerAccountNumber } = parsedCustomer; // Fix here
+      console.log("Customer account number:", customerAccountNumber);
+
+      if (!customerAccountNumber) {
+        console.error("Missing customerAccountNumber.");
+        return rejectWithValue("Invalid customer data.");
+      }
+
+      const response = await axios.post(`${API_BASE_URL}/Users/Customer-Status`, {
+        accountNumber: customerAccountNumber, // Fix here
+        accountStatus: "0",
+      });
+
+      console.log("Response from server:", response.data);
+
+      // Remove customer from AsyncStorage
+      await AsyncStorage.removeItem("customer");
+      console.log("Customer data removed from AsyncStorage.");
+
+      return response.data;
+    } catch (error) {
+      console.error("Error updating account status:", error.response?.data || error.message);
+      return rejectWithValue(error.response?.data || "Failed to update account status.");
+    }
+  }
+);
+
 
 // Initial state
 const initialState = {
@@ -135,6 +177,18 @@ const customerSlice = createSlice({
       .addCase(loginCustomer.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || "Login failed.";
+      })
+      .addCase(updateAccountStatus.pending, (state) => {
+        state.status = "loading";
+        state.error = null;
+      })
+      .addCase(updateAccountStatus.fulfilled, (state) => {
+        state.status = "succeeded";
+        state.customerData = null; // Clear customer data from Redux
+      })
+      .addCase(updateAccountStatus.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.payload || "Failed to update account status.";
       });
   
   },

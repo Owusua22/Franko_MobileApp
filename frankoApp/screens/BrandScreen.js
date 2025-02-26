@@ -76,13 +76,24 @@ const BrandScreen = () => {
         <Text style={styles.productName} numberOfLines={1}>
           {item.productName}
         </Text>
+
         <View style={styles.priceContainer}>
           <Text style={styles.productPrice}>{`₵${formatPrice(item.price)}`}.00</Text>
           {item.oldPrice > 0 && (
             <Text style={styles.oldPrice}>{`₵${formatPrice(item.oldPrice)}`}</Text>
           )}
         </View>
+        <View style={styles.showroomButtonContainer}>
+          <TouchableOpacity style={styles.showroomButton}>
+            <Text style={styles.showroomButtonText}>{item.showRoomName}</Text>
+          </TouchableOpacity>
+        </View>
+        <Image
+          source={require("../assets/frankoIcon.png")}
+          style={styles.frankoLogo}
+        />
       </TouchableOpacity>
+
     );
   };
 
@@ -176,6 +187,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: screenWidth > 600 ? 20 : 10,
     paddingVertical: 10,
     backgroundColor: '#f7f7f7',
+    marginBottom: 60,
   },
   header: {
     flexDirection: 'row',
@@ -259,7 +271,6 @@ const styles = StyleSheet.create({
       shadowOpacity: 0.8,
       shadowRadius: 2,
       elevation: 5,
-      alignItems: 'center',
       maxWidth: '48%',
     },
     discountBadge: {
@@ -291,12 +302,12 @@ const styles = StyleSheet.create({
       fontSize: screenWidth > 600 ? 16 : 14,
       fontWeight: 'bold',
       marginTop: 10,
-      textAlign: 'center',
+     
+      
     },
     priceContainer: {
       flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
+     
     },
     productPrice: {
       fontSize: 14,
@@ -304,10 +315,33 @@ const styles = StyleSheet.create({
       fontWeight: 'bold',
     },
     oldPrice: {
-      fontSize: 14,
+      fontSize: 12,
       color: '#777',
       textDecorationLine: 'line-through',
       marginLeft: 8,
+    },
+    frankoLogo: {
+      position: "absolute",
+      bottom: 2,
+      right: 2,
+      width: 40,
+      height: 40,
+      resizeMode: "contain",
+    },
+    showroomButtonContainer: {
+      marginBottom: 25,
+    },
+    showroomButton: {
+      alignSelf: "flex-start",
+      backgroundColor: "#28a745",
+      paddingHorizontal: 10,
+      paddingVertical: 4,
+      borderRadius: 8,
+    },
+    showroomButtonText: {
+      color: "#fff",
+      fontSize: 10,
+      fontWeight: "bold",
     },
     loader: {
       flex: 1,

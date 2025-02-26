@@ -67,15 +67,62 @@ export const fetchProductById = createAsyncThunk('products/fetchProductById', as
     throw error;
   }
 });
+export const fetchPaginatedProducts = createAsyncThunk(
+  'products/fetchPaginatedProducts',
+  async ({ pageNumber, pageSize = 24 }, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(
+        `${API_BASE_URL}/Product/Product-Get-Paginated`,
+        {
+          params: { PageNumber: pageNumber, PageSize: pageSize },
+        }
+      );
+      
+      // Sort the products by dateCreated before returning the data
+      const sortedData = response.data.sort((a, b) => new Date(b.dateCreated) - new Date(a.dateCreated));
+      
+      // Return the sorted data to Redux
+      return sortedData;
+    } catch (error) {
+      console.error('Error fetching paginated products:', error);
+      
+      // Return the error message to Redux so it can be handled in the state
+      return rejectWithValue(error.response ? error.response.data : error.message);
+    }
+  }
+);
+
+
+export const fetchProductsByCategory = createAsyncThunk('products/fetchProductsByCategory', async (categoryId) => {
+  const response = await axios.get(`${API_BASE_URL}/Product/Product-Get-by-Category/${categoryId}`);
+  return { categoryId, products: response.data.sort((a, b) => new Date(b.dateCreated) - new Date(a.dateCreated)) };
+});
+export const fetchProductByShowroomAndRecord = createAsyncThunk(
+    "products/fetchProductByShowroomAndRecord",
+    async ({ showRoomCode, recordNumber }) => {
+      try {
+        const response = await axios.get(`${API_BASE_URL}/Product/Product-Get-by-ShowRoom_RecordNumber`, {
+          params: {
+            ShowRommCode: showRoomCode, // Fix parameter name
+            RecordNumber: recordNumber,
+          },
+        });
+        return { showRoomCode, products: response.data }; // Ensure we return data mapped to the showroom
+      } catch (error) {
+        console.error("Error fetching product by showroom and record number:", error);
+        throw error;
+      }
+    }
+  );
 
 // Create the product slice
 const productSlice = createSlice({
   name: 'products',
   initialState: {
     products: [],
-
     filteredProducts: [],
     productsByShowroom: {},
+    productsByCategory: {},
     currentProduct: null,
     loading: false,
     error: null,
@@ -164,6 +211,55 @@ const productSlice = createSlice({
         state.loading = false;
         state.error = action.error.message;
       })
+      .addCase(fetchProductsByCategory.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(fetchProductsByCategory.fulfilled, (state, action) => {
+        state.loading = false;
+        const { categoryId, products } = action.payload || {}; // Ensure action.payload is defined
+      
+        if (!categoryId) {
+          console.error("categoryId is undefined:", action.payload);
+          return;
+        }
+      
+        // ✅ Ensure `state.productsByCategory` exists before modifying it
+        if (!state.productsByCategory) {
+          state.productsByCategory = {};
+        }
+      
+        state.productsByCategory[categoryId] = products || []; // ✅ Fix: Always set a valid array
+      })
+      
+      .addCase(fetchProductsByCategory.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message;
+      })
+      .addCase(fetchPaginatedProducts.pending, (state) => {
+        state.loading = true;
+        state.error = null; // Reset error on new request
+      })
+      .addCase(fetchPaginatedProducts.fulfilled, (state, action) => {
+        state.loading = false;
+        state.products = action.payload; // Assign fetched products
+      })
+      .addCase(fetchPaginatedProducts.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || 'Failed to fetch products'; // Set error message from action payload
+      })
+      .addCase(fetchProductByShowroomAndRecord.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(fetchProductByShowroomAndRecord.fulfilled, (state, action) => {
+        const { showRoomCode, products } = action.payload;
+        state.productsByShowroom[showRoomCode] = products; // Store data by showroom
+        state.loading = false;
+      })
+      .addCase(fetchProductByShowroomAndRecord.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message;
+      });
+      
       },
 });
 // Export the reducer and actions
