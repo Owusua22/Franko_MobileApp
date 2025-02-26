@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   View,
   Text,
@@ -14,34 +14,57 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchProductsByShowroom } from "../redux/slice/productSlice";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { AntDesign } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const screenWidth = Dimensions.get("window").width;
 
 const ShowroomScreen = () => {
   const dispatch = useDispatch();
   const navigation = useNavigation();
-  const route = useRoute();
+  const route = useRoute(); 
   const { showRoomID, showRoomName, showRoomLogo } = route.params || {};
 
   const { productsByShowroom = {}, loading } = useSelector((state) => state.products);
 
   const [minPrice, setMinPrice] = useState(0);
   const [maxPrice, setMaxPrice] = useState(200000);
+  const flatListRef = useRef(null);
 
   useEffect(() => {
     if (showRoomID) {
       dispatch(fetchProductsByShowroom(showRoomID));
     }
+  
+    const restoreScrollPosition = async () => {
+      try {
+        const savedPosition = await AsyncStorage.getItem(`scrollPosition-${showRoomID}`);
+        if (savedPosition !== null && flatListRef.current) {
+          setTimeout(() => {
+            flatListRef.current?.scrollToOffset({ 
+              offset: parseFloat(savedPosition), 
+              animated: false 
+            });
+          }, 500); // Small delay to ensure FlatList is ready
+        }
+      } catch (error) {
+        console.error("Failed to load scroll position:", error);
+      }
+    };
+  
+    restoreScrollPosition();
   }, [dispatch, showRoomID]);
+  
+  
 
   const filteredProducts = (productsByShowroom[showRoomID] || [])
     .filter((product) => product.price >= minPrice && product.price <= maxPrice)
     .sort((a, b) => new Date(b.dateCreated) - new Date(a.dateCreated));
 
-  const formatPrice = (price) => price.toLocaleString(undefined, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
+  const formatPrice = (price) =>
+    price.toLocaleString(undefined, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
 
   const calculateDiscount = (oldPrice, price) => {
     return oldPrice > price ? Math.round(((oldPrice - price) / oldPrice) * 100) : 0;
@@ -100,11 +123,21 @@ const ShowroomScreen = () => {
 
       {/* Product List */}
       <FlatList
+        ref={flatListRef}
         data={filteredProducts}
         keyExtractor={(item) => item.productID.toString()}
         numColumns={2}
         columnWrapperStyle={styles.row}
         contentContainerStyle={styles.listContainer}
+        onScrollEndDrag={async (event) => {
+          try {
+            const scrollPosition = event.nativeEvent.contentOffset.y;
+            await AsyncStorage.setItem(`scrollPosition-${showRoomID}`, scrollPosition.toString());
+          } catch (error) {
+            console.error("Failed to save scroll position:", error);
+          }
+        }}
+        
         renderItem={({ item }) => {
           const discount = calculateDiscount(item.oldPrice, item.price);
           const productImageURL = getValidImageURL(item.productImage);
@@ -112,7 +145,16 @@ const ShowroomScreen = () => {
           return (
             <TouchableOpacity
               style={styles.productCard}
-              onPress={() => navigation.navigate("ProductDetails", { productId: item.productID })}
+              onPress={async () => {
+                try {
+                  const scrollPosition = await AsyncStorage.getItem(`scrollPosition-${showRoomID}`);
+                  await AsyncStorage.setItem(`scrollPosition-${showRoomID}`, scrollPosition || "0");
+                } catch (error) {
+                  console.error("Failed to save scroll position:", error);
+                }
+
+                navigation.navigate("ProductDetails", { productId: item.productID });
+              }}
             >
               <View style={styles.imageContainer}>
                 <Image source={{ uri: productImageURL }} style={styles.productImage} />
@@ -122,7 +164,9 @@ const ShowroomScreen = () => {
                   </View>
                 )}
               </View>
-              <Text style={styles.productName} numberOfLines={1}>{item.productName}</Text>
+              <Text style={styles.productName} numberOfLines={1}>
+                {item.productName}
+              </Text>
               <View style={styles.priceContainer}>
                 <Text style={styles.currentPrice}>₵{formatPrice(item.price)}</Text>
                 {item.oldPrice > 0 && (
@@ -139,6 +183,9 @@ const ShowroomScreen = () => {
 };
 
 export default ShowroomScreen;
+
+
+
 
 const styles = StyleSheet.create({
   container: {

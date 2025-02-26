@@ -77,7 +77,6 @@ export const checkOutOrder = createAsyncThunk(
   }
 );
 
-
 export const getSalesOrder = createAsyncThunk(
   "orders/getSalesOrder",
   async (OrderId, { rejectWithValue }) => {
@@ -191,6 +190,7 @@ const orderSlice = createSlice({
   name: "order",
   initialState: {
     orders: [],
+    salesOrder: [],
     deliveryAddress: [],
     orderDetails: null,
     addressDetails: null,
@@ -202,6 +202,78 @@ const orderSlice = createSlice({
     clearOrders: (state) => {
       state.orders = [];
       clearOrdersFromAsyncStorage(); // Clear from AsyncStorage
+    },
+    clearLocalStorage: (state) => {
+    AsyncStorage.removeItem("checkoutDetails");
+    AsyncStorage.removeItem("orderAddressDetails");
+    AsyncStorage.removeItem("userOrders");
+      state.checkoutDetails = null;
+      state.orderAddressDetails = null;
+      state.orders = [];
+    },
+
+    // Save checkout details
+    saveCheckoutDetails: (state, action) => {
+      const checkoutDetails = action.payload;
+      state.checkoutDetails = checkoutDetails;
+
+      // Persist in localStorage
+    AsyncStorage.setItem("checkoutDetails", JSON.stringify(checkoutDetails));
+    },
+ 
+    // Save order address details
+    saveAddressDetails: (state, action) => {
+      const orderAddressDetails = action.payload;
+      state.orderAddressDetails = orderAddressDetails;
+
+      // Persist in localStorage
+    AsyncStorage.setItem("orderAddressDetails", JSON.stringify(orderAddressDetails));
+    },
+
+    // Store the local order
+    storeLocalOrder: (state, action) => {
+      const { userId, orderId } = action.payload;
+      const storedOrders = JSON.parse(localStorage.getItem("userOrders")) || [];
+
+      // Check if the order already exists
+      const existingOrderIndex = storedOrders.findIndex(
+        (order) => order.userId === userId && order.orderId === orderId
+      );
+
+      if (existingOrderIndex !== -1) {
+        storedOrders[existingOrderIndex] = action.payload;
+      } else {
+        storedOrders.push(action.payload);
+      }
+
+      // Update state and persist to localStorage
+      state.orders = storedOrders;
+    AsyncStorage.setItem("userOrders", JSON.stringify(storedOrders));
+    },
+
+    // Fetch orders by user
+    fetchOrdersByUser: (state, action) => {
+      const userId = action.payload;
+      const storedOrders = JSON.parse(localStorage.getItem("userOrders")) || [];
+      state.orders = storedOrders.filter((order) => order.userId === userId);
+    },
+
+    // Clear orders
+    clearOrders: (state) => {
+      state.orders = [];
+      state.salesOrder = [];
+      state.deliveryAddress = [];
+      state.loading = {
+        orders: false,
+        deliveryAddress: false,
+        deliveryUpdate: false,
+      };
+      state.error = {
+        orders: null,
+        lifeCycle: null,
+        deliveryAddress: null,
+        deliveryUpdate: null,
+      };
     },
   },
   extraReducers: (builder) => {

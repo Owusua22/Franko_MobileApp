@@ -20,7 +20,7 @@ import BrandScreen from './screens/BrandScreen';
 import NotificationsScreen from './screens/NotificationsScreen';
 import OrderReceivedScreen from './screens/OrderReceivedScreen';
 import OrderHistoryScreen from './screens/OrderHistoryScreen';
-import ProductsScreen from './screens/ProductsScreen';
+import ProductsScreen from './screens/ProductsScreen.js';
 import AboutScreen from './screens/AboutScreen';
 import ContactUsScreen from './screens/ContactUsScreen';
 import PolicyScreen from './screens/PolicyScreen';
@@ -39,6 +39,10 @@ import ComboScreen from './screens/Categories/ComboScreen';
 import ApplianceScreen from './screens/Categories/ApplianceScreen';
 import FridgeScreen from './screens/Categories/FridgeScreen';
 import { Ionicons } from 'react-native-vector-icons'; // Import icons
+import RecentlyViewedScreen from './screens/RecentlyViewedScreen';
+import CustomerServiceScreen from './screens/CustomerService';
+import InviteScreen from './screens/InviteScreen';
+import AddressManagementScreen from './screens/AddressManagementScreen.js';
 
 
 const Stack = createStackNavigator();
@@ -50,7 +54,7 @@ const WelcomeScreen = ({ onReady }) => {
   useEffect(() => {
     const fetchData = async () => {
       await Promise.all([
-        new Promise((resolve) => setTimeout(resolve, 5000)), // 5-second delay
+        new Promise((resolve) => setTimeout(resolve, 3000)), // 5-second delay
       ]);
   
       setLoading(false);
@@ -72,8 +76,6 @@ const WelcomeScreen = ({ onReady }) => {
     </View>
   );
 };
-
-
 const AppStack = () => {
   return (
     <Stack.Navigator initialRouteName="Home" screenOptions={{ headerShown: false }}>
@@ -103,6 +105,10 @@ const AppStack = () => {
       <Stack.Screen name="AirCondition" component={AirConditionScreen} /> 
       <Stack.Screen name="Combo" component={ComboScreen} />
       <Stack.Screen name="Appliances" component={ApplianceScreen} />
+      <Stack.Screen name="RecentlyViewed" component={RecentlyViewedScreenWithFooter} />
+      <Stack.Screen name="CustomerService" component={CustomerServiceScreenWithFooter} />
+      <Stack.Screen name="Invite" component={InviteScreenWithFooter} />
+      <Stack.Screen name="AddressManagement" component={AddressManagementScreenWithFooter} />
 
       
     </Stack.Navigator>
@@ -235,7 +241,31 @@ const CartScreenWithFooter = () => (
     <Footer />
   </>
 );
+const CustomerServiceScreenWithFooter = () => (
+  <>
+   <CustomerServiceScreen/>
+    <Footer />
+  </>
+);
+const RecentlyViewedScreenWithFooter = () => (
+  <>
+    <RecentlyViewedScreen/>
+    <Footer />
+  </>
+);
+const AddressManagementScreenWithFooter = () => (
+  <>
+    <AddressManagementScreen/>
+    <Footer />
+  </>
+);
 
+const InviteScreenWithFooter = () => (
+  <>
+    <InviteScreen/>
+    <Footer />
+  </>
+);
 export default App;
 
 const styles = StyleSheet.create({

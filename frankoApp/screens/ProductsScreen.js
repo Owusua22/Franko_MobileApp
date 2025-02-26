@@ -11,8 +11,9 @@ import {
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchPaginatedProducts } from "../redux/slice/productSlice";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation ,useFocusEffect} from "@react-navigation/native";
 import { AntDesign } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -30,18 +31,36 @@ const ProductsScreen = () => {
 
   const itemsPerPage = 24;
   useEffect(() => {
-    setLoadingMore(true); // Show loading indicator when fetching
+    setLoadingMore(true);
     dispatch(fetchPaginatedProducts({ pageNumber: currentPage, pageSize: itemsPerPage })).then(
-      (response) => {
+      async (response) => {
         if (response.payload) {
           setAllProducts((prevProducts) =>
             currentPage === 1 ? response.payload : [...prevProducts, ...response.payload]
           );
+
+          // Restore scroll position after products are loaded
+          const savedScrollPosition = await AsyncStorage.getItem("scrollPosition");
+          if (savedScrollPosition && flatListRef.current) {
+            flatListRef.current.scrollToOffset({ offset: parseFloat(savedScrollPosition), animated: false });
+          }
         }
-        setLoadingMore(false); // Hide loading indicator when done
+        setLoadingMore(false);
       }
     );
   }, [currentPage]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const restoreScrollPosition = async () => {
+        const savedScrollPosition = await AsyncStorage.getItem("scrollPosition");
+        if (savedScrollPosition && flatListRef.current) {
+          flatListRef.current.scrollToOffset({ offset: parseFloat(savedScrollPosition), animated: false });
+        }
+      };
+      restoreScrollPosition();
+    }, [])
+  );
    // Removed dispatch from dependencies
 
   const filteredProducts = useMemo(() => {
@@ -63,6 +82,15 @@ const ProductsScreen = () => {
     }
     return imagePath;
   };
+  const handleProductPress = async (productId, event) => {
+    // Store current scroll position
+    const scrollPosition = await flatListRef.current?.scrollToOffset({ animated: false });
+    await AsyncStorage.setItem("scrollPosition", JSON.stringify(scrollPosition));
+
+    // Navigate to ProductDetails
+    navigation.navigate("ProductDetails", { productId });
+  };
+
 
   const formatPrice = (price) =>
     price ? new Intl.NumberFormat("en-GH", { style: "currency", currency: "GHS" }).format(price) : "N/A";

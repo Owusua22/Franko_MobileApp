@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import {
   View,
   Text,
@@ -9,41 +9,88 @@ import {
   ActivityIndicator,
   StyleSheet,
   Dimensions,
+
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchProductsByBrand } from '../redux/slice/productSlice';
-import { fetchBrands } from '../redux/slice/brandSlice';
+import { fetchProductsByBrand , clearProducts} from '../redux/slice/productSlice';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { AntDesign } from '@expo/vector-icons';
-
 const screenWidth = Dimensions.get('window').width;
 
 const BrandScreen = () => {
-  const { brandId } = useRoute().params;
+  const route = useRoute();
   const dispatch = useDispatch();
   const navigation = useNavigation();
 
-  const productsState = useSelector((state) => state.products);
-  const brandsState = useSelector((state) => state.brands);
-
+  const brandId = route.params?.brandId || null;
+  const productsState = useSelector((state) => state.products || { products: [], loading: false });
+  const brandsState = useSelector((state) => state.brands || { brands: [], loading: false });
+  const [selectedBrandId, setSelectedBrandId] = useState(brandId);
   const [minPrice, setMinPrice] = useState(0);
   const [maxPrice, setMaxPrice] = useState(200000);
 
-  useEffect(() => {
-    dispatch(fetchBrands());
-    if (brandId) {
-      dispatch(fetchProductsByBrand(brandId));
-    }
-  }, [dispatch, brandId]);
-
-  const selectedBrand = brandsState.brands.find((brand) => brand.brandId === brandId);
-  const relatedBrands = selectedBrand
-    ? brandsState.brands.filter((brand) => brand.categoryId === selectedBrand.categoryId)
-    : [];
-
-  const handleNavigateProduct = (productId) => {
-    navigation.navigate('ProductDetails', { productId });
+  const scrollPositionRef = useRef(0);
+  const flatListRef = useRef(null);
+  const onScroll = async (event) => {
+    const offsetY = event.nativeEvent.contentOffset.y;
+    scrollPositionRef.current = offsetY;
+    await AsyncStorage.setItem(`scrollPosition_${brandId}`, JSON.stringify(offsetY));
   };
+  
+
+  // Fetch brands and products when brandId changes
+  useFocusEffect(
+    useCallback(() => {
+      const restoreScrollPosition = async () => {
+        const savedPosition = await AsyncStorage.getItem(`scrollPosition_${brandId}`);
+        if (savedPosition !== null && flatListRef.current) {
+          flatListRef.current.scrollToOffset({
+            offset: JSON.parse(savedPosition),
+            animated: false,
+          });
+        }
+      };
+  
+      dispatch(clearProducts());
+      dispatch(fetchProductsByBrand(brandId)).then(() => {
+        restoreScrollPosition();
+      });
+  
+      return () => {
+        AsyncStorage.removeItem(`scrollPosition_${brandId}`);
+      };
+    }, [brandId, dispatch])
+  );
+  
+  // Restore scroll position when products update
+  useEffect(() => {
+    if (flatListRef.current) {
+      flatListRef.current.scrollToOffset?.({
+        offset: scrollPositionRef.current || 0,
+        animated: false,
+      });
+    }
+  }, [productsState.products]);
+  
+  
+  
+
+  const selectedBrand = brandsState.brands?.find((brand) => brand.brandId === brandId) || {};
+
+  const relatedBrands = selectedBrand?.categoryId
+  ? brandsState.brands.filter((brand) => brand.categoryId === selectedBrand.categoryId)
+  : [];
+  const handleNavigateProduct = (productId) => {
+    // Store scroll position correctly
+    scrollPositionRef.current = scrollPositionRef.current || 0;
+  
+    navigation.navigate('ProductDetails', { productId, brandId });
+  };
+  
 
   const formatPrice = (price) =>
     price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
@@ -93,7 +140,6 @@ const BrandScreen = () => {
           style={styles.frankoLogo}
         />
       </TouchableOpacity>
-
     );
   };
 
@@ -120,7 +166,11 @@ const BrandScreen = () => {
                 styles.brandBadge,
                 item.brandId === brandId && styles.activeBrandBadge,
               ]}
-              onPress={() => navigation.navigate('Brands', { brandId: item.brandId })}
+             onPress={() => {
+  setSelectedBrandId(item.brandId);
+  navigation.navigate('Brands', { brandId: item.brandId });
+}}
+
             >
               <Text
                 style={[
@@ -167,18 +217,23 @@ const BrandScreen = () => {
         </View>
       ) : (
         <FlatList
-          data={productsState.products}
-          keyExtractor={(item) => item.productID.toString()}
-          renderItem={renderProduct}
-          numColumns={2}
-          contentContainerStyle={styles.productList}
-          showsVerticalScrollIndicator={false}
-        />
+        ref={flatListRef}
+        data={productsState.products}
+        keyExtractor={(item) => item.productID.toString()}
+        renderItem={renderProduct}
+        numColumns={2}
+        contentContainerStyle={styles.productList}
+        showsVerticalScrollIndicator={false}
+        onScroll={onScroll}
+        scrollEventThrottle={16}
+      />
+      
+      
+      
       )}
     </View>
   );
 };
-
 
 
 const styles = StyleSheet.create({
@@ -278,26 +333,23 @@ const styles = StyleSheet.create({
       top: 10,
       left: 10,
       backgroundColor: '#ff6347',
-      paddingHorizontal: 4,  // Increased horizontal padding for more space
-      paddingVertical: 4,   
-      borderRadius: 4,
-            // Ensure a minimum width for the badge
-      
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      borderRadius: 10,
+      zIndex: 10, // Ensures it stays on top of the product image
     },
-    
     discountText: {
       color: '#fff',
+      fontSize: 10,
       fontWeight: 'bold',
-      fontSize: 10,            // Slightly increased font size for better readability
-      textAlign: 'center',      // Ensure the text is centered in the badge
+    },
+    productImage: {
+      width: '100%',
+      height: 150,
+      borderRadius: 10,
+      zIndex: 1, // Ensure image stays behind the discount badge
     },
     
-  
-    productImage: {
-      width: "100%",
-      height: 120,
-      resizeMode: "contain",
-    },
     productName: {
       fontSize: 12,
       fontWeight: 'bold',

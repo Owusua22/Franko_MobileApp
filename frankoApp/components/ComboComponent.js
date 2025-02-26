@@ -145,8 +145,8 @@ const ComboComponent = () => {
 export default ComboComponent;
 
 const styles = StyleSheet.create({
-  container: { padding: 10, backgroundColor: "#fff", marginBottom: 50 },
-  showroomContainer: { marginBottom: 10 },
+  container: { padding: 10, backgroundColor: "#fff", marginBottom: 80 },
+  showroomContainer: { marginBottom: 5 },
   showroomHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -221,6 +221,16 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     justifyContent: "center",
     alignItems: "center",
+    position: "relative",
+    overflow: "hidden",
   },
-  frankoLogo: { width: 50, height: 50, resizeMode: "contain" },
+  
+  frankoLogo: {
+    width: 50, // Increase size
+    height: 50,
+    resizeMode: "contain",
+    position: "absolute",
+    opacity: 0.15, // Reduce opacity to make it a watermark
+  },
+  
 });

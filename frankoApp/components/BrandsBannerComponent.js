@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -10,30 +10,32 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import _ from 'lodash';
 
 const brands = [
   { id: '760af684-7a19-46ab-acc5-7445ef32073a', logo: require('../assets/samsung.png'), name: 'Samsung' },
   { id: 'c163ee86-1d24-4c97-943b-1f82a09c6066', logo: require('../assets/infinix.png'), name: 'Infinix' },
-  { id: 'a85aa52a-2bf9-4fb5-ab36-8cd9bba4baa8', logo: require('../assets/hmd.png'), name: 'HMD' },
+  { id: 'fb694e59-77be-455f-9573-acf917ffb39d', logo: require('../assets/hmd.png'), name: 'HMD' },
   { id: '86cca959-70a4-448e-86f1-3601309f49a6', logo: require('../assets/tecno-logo.png'), name: 'Tecno' },
   { id: '5c6cf9ae-d44f-42a9-82e5-c82bbf6913cd', logo: require('../assets/apple.jpeg'), name: 'Apple' },
   { id: 'd643698d-f794-4d33-9237-4a913aa463a2', logo: require('../assets/huawel.jpeg'), name: 'Huawei' },
 ];
 
-const BrandCard = React.memo(({ brand, navigation }) => (
-  <TouchableOpacity
-    onPress={() => navigation.navigate('Brands', { brandId: brand.id })}
-    style={styles.brandCard}
-  >
-    <Image source={brand.logo} style={styles.brandImage} resizeMode="contain" />
-  </TouchableOpacity>
-));
+const BrandCard = React.memo(({ brand }) => {
+  const navigation = useNavigation(); // Use navigation inside BrandCard
+
+  return (
+    <TouchableOpacity
+      onPress={() => navigation.navigate('Brands', { brandId: brand.id })}
+      style={styles.brandCard}
+    >
+      <Image source={brand.logo} style={styles.brandImage} resizeMode="contain" />
+    </TouchableOpacity>
+  );
+});
 
 export default function ShopByBrandsBanner() {
   const [showArrows, setShowArrows] = useState(false);
-  const scrollViewRef = React.useRef(null);
-  const navigation = useNavigation();
+  const scrollViewRef = useRef(null);
   const { width } = Dimensions.get('window');
 
   useEffect(() => {
@@ -41,10 +43,12 @@ export default function ShopByBrandsBanner() {
   }, [width]);
 
   const scrollBy = (direction) => {
-    scrollViewRef.current?.scrollTo({
-      x: direction === 'left' ? -200 : 200,
-      animated: true,
-    });
+    if (scrollViewRef.current) {
+      scrollViewRef.current.scrollTo({
+        x: direction === 'left' ? -200 : 200,
+        animated: true,
+      });
+    }
   };
 
   return (
@@ -54,16 +58,10 @@ export default function ShopByBrandsBanner() {
         <View style={styles.scrollContainer}>
           {showArrows && (
             <>
-              <TouchableOpacity
-                style={styles.arrowLeft}
-                onPress={() => scrollBy('left')}
-              >
+              <TouchableOpacity style={styles.arrowLeft} onPress={() => scrollBy('left')}>
                 <Ionicons name="chevron-back" size={20} color="#fff" />
               </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.arrowRight}
-                onPress={() => scrollBy('right')}
-              >
+              <TouchableOpacity style={styles.arrowRight} onPress={() => scrollBy('right')}>
                 <Ionicons name="chevron-forward" size={20} color="#fff" />
               </TouchableOpacity>
             </>
@@ -75,7 +73,7 @@ export default function ShopByBrandsBanner() {
             style={styles.scrollView}
           >
             {brands.map((brand) => (
-              <BrandCard key={brand.id} brand={brand} navigation={navigation} />
+              <BrandCard key={brand.id} brand={brand} />
             ))}
           </ScrollView>
         </View>
@@ -87,13 +85,13 @@ export default function ShopByBrandsBanner() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: 10,
+    paddingHorizontal: 8,
     backgroundColor: '#f0f0f0',
   },
   banner: {
     backgroundColor: '#28a745',
     borderRadius: 10,
-    padding: 15,
+    padding: 10,
     marginTop: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 3 },
@@ -105,7 +103,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 14,
     fontWeight: 'bold',
-    marginBottom: 10,
+    marginBottom: 2,
   },
   scrollContainer: {
     position: 'relative',
@@ -115,29 +113,29 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   brandCard: {
-    width: 100,
-    height: 80,
-    marginRight: 10,
+    width: 80, // Reduced width
+    height: 60, // Reduced height
+    marginRight: 8, // Adjusted spacing
     backgroundColor: '#fff',
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 8,
+    borderRadius: 6, // Slightly smaller radius
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.15,
+    shadowRadius: 3,
+    elevation: 3,
   },
   brandImage: {
-    width: 80,
-    height: 60,
+    width: 60, // Smaller width
+    height: 40, // Smaller height
   },
   arrowLeft: {
     position: 'absolute',
     left: -10,
     top: '40%',
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    padding: 8,
+    padding: 6,
     borderRadius: 20,
     zIndex: 10,
   },
@@ -146,7 +144,7 @@ const styles = StyleSheet.create({
     right: -10,
     top: '40%',
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    padding: 8,
+    padding: 6,
     borderRadius: 20,
     zIndex: 10,
   },

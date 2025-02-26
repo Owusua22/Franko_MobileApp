@@ -5,6 +5,12 @@ import BannerComponent from '../components/BannerComponent';
 import ShopByBrandsBanner from '../components/BrandsBannerComponent';
 import ComboComponent from "../components/ComboComponent";
 import CategoryComponent from '../components/CategoryComponent';
+import PhonesComponent from '../components/PhonesComponent';
+import LaptopComponent from '../components/LaptopComponent';
+import FridgeComponent from '../components/fridgeComponent';
+import TelevisionComponent from '../components/TelevisionComponent';
+import AppliancesComponent from '../components/AppliancesComponent';
+import SpeakerComponent from '../components/SpeakersComponent';
 
 const HomeScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
@@ -12,9 +18,17 @@ const HomeScreen = () => {
   const sections = [
     { key: 'carousel', component: <CarouselComponent /> },
     { key: 'categorycomponent', component: <CategoryComponent /> },
+    {key:"phonecomponent", component:<PhonesComponent/>},
+    {key:"laptopcomponent", component:<LaptopComponent/>},
+    { key: 'fridgecomponent', component: <FridgeComponent/> },
+    {key: "televisioncomponent", component:<TelevisionComponent/>},
+    {key:"appliancecomponent", component:<AppliancesComponent/>},
+    {key: "speakercomponent", component: <SpeakerComponent/>},
+    
     { key: 'brandsbanner', component: <ShopByBrandsBanner /> },
     { key: 'banner', component: <BannerComponent /> },
     { key: 'combocomponent', component: <ComboComponent /> },
+
   ];
 
   const handleRefresh = useCallback(() => {
@@ -37,18 +51,12 @@ const HomeScreen = () => {
     />
   );
 };
-
 const styles = StyleSheet.create({
   sectionContainer: {
-    marginBottom: 20,
+   overflow: 'hidden',
     borderRadius: 10,
-    backgroundColor: '#fff',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 5,
-  },
+    backgroundColor: '#fffff',
+    shadowColor: '#000',},
 });
 
 export default HomeScreen;

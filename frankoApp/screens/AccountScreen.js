@@ -3,40 +3,30 @@ import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
   ActivityIndicator,
   TouchableOpacity,
-  Modal,
+  FlatList,
   Alert,
 } from "react-native";
-import { useDispatch, useSelector } from "react-redux";
-import { fetchShippingCountries, fetchShippingDivisions, fetchShippingLocations } from "../redux/slice/shippingSlice";
+import { useDispatch } from "react-redux";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Picker } from "@react-native-picker/picker";
 import { useNavigation } from "@react-navigation/native";
-import Icon from "react-native-vector-icons/MaterialCommunityIcons"; 
+import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import { fetchShippingCountries } from "../redux/slice/shippingSlice";
 import { updateAccountStatus } from "../redux/slice/customerSlice";
 
 const AccountScreen = () => {
   const [customerData, setCustomerData] = useState(null);
-  const [shippingDetails, setShippingDetails] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [selectedCountry, setSelectedCountry] = useState("");
-  const [selectedDivision, setSelectedDivision] = useState("");
-  const [selectedLocation, setSelectedLocation] = useState("");
 
   const dispatch = useDispatch();
   const navigation = useNavigation();
-  const { countries, divisions, locations, loading: shippingLoading } = useSelector((state) => state.shipping);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const customer = await AsyncStorage.getItem("customer");
-        const shipping = await AsyncStorage.getItem("shippingDetails");
         if (customer) setCustomerData(JSON.parse(customer));
-        if (shipping) setShippingDetails(JSON.parse(shipping));
       } catch (error) {
         console.error("Error fetching user data:", error);
       } finally {
@@ -60,7 +50,7 @@ const AccountScreen = () => {
           text: "Yes, Delete",
           onPress: async () => {
             try {
-              const result = await dispatch(updateAccountStatus()).unwrap();
+              await dispatch(updateAccountStatus()).unwrap();
               Alert.alert("Account Deleted", "Your account has been deactivated.");
               navigation.navigate("Home");
             } catch (error) {
@@ -81,131 +71,122 @@ const AccountScreen = () => {
     );
   }
 
+  const orderActions = [
+    { name: "To Pay", icon: "credit-card-outline" },
+    { name: "To Receive", icon: "truck-outline" },
+    { name: "To Rate", icon: "star-outline", badge: true },
+    { name: "After sale", icon: "archive-outline" },
+  ];
+
+  const accountOptions = [
+    { name: "Invite friends", icon: "gift-outline", extra: "Receive Reward", screen: "Invite" },
+    { name: "Recently Viewed", icon: "clock-outline", screen: "RecentlyViewed" },
+    { name: "Address Management", icon: "map-marker-outline", screen: "AddressManagement" },
+    { name: "Contact customer service", icon: "phone-outline", screen: "CustomerService" },
+  ];
+
   return (
-    <ScrollView style={styles.container}>
-      {/* Account Information */}
-      <View style={styles.card}>
-        <Text style={styles.sectionTitle}>Account Information</Text>
-        {customerData ? (
-          <>
-            <View style={styles.infoRow}>
-              <Icon name="account" size={22} color="#555" style={styles.icon} />
-              <Text style={styles.infoText}>{customerData.firstName} {customerData.lastName}</Text>
-            </View>
-            <View style={styles.infoRow}>
-              <Icon name="email" size={22} color="#555" style={styles.icon} />
-              <Text style={styles.infoText}>{customerData.email}</Text>
-            </View>
-            <View style={styles.infoRow}>
-              <Icon name="phone" size={22} color="#555" style={styles.icon} />
-              <Text style={styles.infoText}>{customerData.contactNumber}</Text>
-            </View>
-          </>
-        ) : (
+    <View style={styles.container}>
+      <FlatList
+        ListHeaderComponent={
           <View>
-            <TouchableOpacity onPress={() => navigation.navigate("Signup")}>
-              <Text style={styles.registerText}>Register</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => navigation.navigate("SignIn")}>
-              <Text style={styles.registerText}>Login</Text>
-            </TouchableOpacity>
+            <View style={styles.card}>
+              <Text style={styles.sectionTitle}>Account Information</Text>
+              {customerData ? (
+                <>
+                  <View style={styles.infoRow}>
+                    <Icon name="account" size={22} color="#555" style={styles.icon} />
+                    <Text style={styles.infoText}>{customerData.firstName} {customerData.lastName}</Text>
+                  </View>
+                  <View style={styles.infoRow}>
+                    <Icon name="email" size={22} color="#555" style={styles.icon} />
+                    <Text style={styles.infoText}>{customerData.email}</Text>
+                  </View>
+                  <View style={styles.infoRow}>
+                    <Icon name="phone" size={22} color="#555" style={styles.icon} />
+                    <Text style={styles.infoText}>{customerData.contactNumber}</Text>
+                  </View>
+                </>
+              ) : (
+                <View>
+                  <TouchableOpacity onPress={() => navigation.navigate("Signup")}>
+                    <Text style={styles.registerText}>Register</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => navigation.navigate("SignIn")}>
+                    <Text style={styles.registerText}>Login</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+            </View>
+
+            {customerData && (
+              <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteAccount}>
+                <Text style={styles.deleteButtonText}>Delete Account</Text>
+              </TouchableOpacity>
+            )}
+
+            <View style={styles.orderCard}>
+              <View style={styles.orderHeader}>
+                <Text style={styles.sectionTitle}>My Order</Text>
+                <TouchableOpacity>
+                  <Text style={styles.viewAll}>View All</Text>
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.orderActions}>
+                {orderActions.map((item, index) => (
+                  <View key={index} style={styles.orderItem}>
+                    <Icon name={item.icon} size={26} color="#333" />
+                    {item.badge && <View style={styles.badge} />}
+                    <Text style={styles.orderText}>{item.name}</Text>
+                  </View>
+                ))}
+              </View>
+            </View>
           </View>
+        }
+        data={accountOptions}
+        keyExtractor={(item) => item.name}
+        renderItem={({ item }) => (
+          <TouchableOpacity style={styles.listItem} onPress={() => navigation.navigate(item.screen)}>
+            <View style={styles.listLeft}>
+              <Icon name={item.icon} size={22} color="#555" />
+              <Text style={styles.listText}>{item.name}</Text>
+            </View>
+            {item.extra && (
+              <View style={styles.extraTag}>
+                <Text style={styles.extraText}>{item.extra}</Text>
+              </View>
+            )}
+          </TouchableOpacity>
         )}
-      </View>
-
-      {/* Delivery Address */}
-      <View style={styles.card}>
-        <Text style={styles.sectionTitle}>Delivery Address</Text>
-        <Text style={styles.infoText}>
-          {shippingDetails
-            ? `${shippingDetails.location}, ${shippingDetails.division}, ${shippingDetails.country}`
-            : "No shipping details found"}
-        </Text>
-      </View>
-
-      {/* Delete Account Button (Only if customer details exist) */}
-      {customerData && (
-        <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteAccount}>
-          <Text style={styles.deleteButtonText}>Delete Account</Text>
-        </TouchableOpacity>
-      )}
-    </ScrollView>
+      />
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 16,
-    backgroundColor: "#F7F8FA",
-  },
-  card: {
-    backgroundColor: "#fff",
-    padding: 16,
-    borderRadius: 10,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 3,
-    marginBottom: 10,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 12,
-    color: "#333",
-  },
-  infoRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  icon: {
-    marginRight: 10,
-  },
-  infoText: {
-    fontSize: 16,
-    color: "#555",
-  },
-  authButton: {
-    backgroundColor: "#007AFF",
-    padding: 10,
-    borderRadius: 5,
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  authButtonText: {
-    color: "#fff",
-    fontSize: 16,
-  },
-  button: {
-    backgroundColor: "#28A745",
-    padding: 12,
-    borderRadius: 5,
-    alignItems: "center",
-  },
-  buttonText: {
-    color: "#fff",
-    fontSize: 16,
-  },
-  deleteButton: {
-    backgroundColor: "#FF3B30",
-    padding: 12,
-    borderRadius: 5,
-    alignItems: "center",
-    marginVertical: 16,
-    marginBottom: 20,
-  },
-  deleteButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  centered: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
+  container: { flex: 1, backgroundColor: "#F8F8F8", padding: 10, paddingBottom: 90 },
+  card: { backgroundColor: "#fff", padding: 15, margin: 10, borderRadius: 10, elevation: 2 },
+  sectionTitle: { fontSize: 16, fontWeight: "bold" },
+  infoRow: { flexDirection: "row", alignItems: "center", marginVertical: 5 },
+  icon: { marginRight: 10 },
+  infoText: { fontSize: 14, color: "#333" },
+  registerText: { color: "#00A86B", textAlign: "center", marginTop: 10 },
+  deleteButton: { backgroundColor: "#FF6347", padding: 6, borderRadius: 7, margin: 10, alignItems: "center" },
+  deleteButtonText: { color: "#fff", fontSize: 12 },
+  orderCard: { backgroundColor: "#fff", margin: 10, padding: 15, borderRadius: 10, elevation: 2 },
+  orderHeader: { flexDirection: "row", justifyContent: "space-between" },
+  viewAll: { color: "#00A86B", fontSize: 14 },
+  orderActions: { flexDirection: "row", justifyContent: "space-around", marginTop: 10 },
+  orderItem: { alignItems: "center" },
+  orderText: { fontSize: 14, marginTop: 5 },
+  badge: { position: "absolute", top: -5, right: -5, width: 10, height: 10, backgroundColor: "red", borderRadius: 5 },
+  listItem: { flexDirection: "row", justifyContent: "space-between", paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: "#eee" },
+  listLeft: { flexDirection: "row", alignItems: "center" },
+  listText: { marginLeft: 10, fontSize: 14, color: "#333" },
+  extraTag: { backgroundColor: "#00A86B", paddingHorizontal: 8, paddingVertical: 2, borderRadius: 5 },
+  extraText: { color: "#fff", fontSize: 12 },
 });
 
 export default AccountScreen;

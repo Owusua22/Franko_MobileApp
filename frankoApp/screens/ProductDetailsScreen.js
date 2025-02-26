@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -15,6 +14,7 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { fetchProductById, fetchProducts } from "../redux/slice/productSlice";
 import { useRoute, useNavigation } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { addToCart } from "../redux/slice/cartSlice";
 
@@ -42,7 +42,48 @@ const ProductDetailsScreen = () => {
   useEffect(() => {
     dispatch(fetchProducts());
     dispatch(fetchProductById(productId));
+
+    if (currentProduct && currentProduct.length > 0) {
+      storeProductInAsyncStorage(currentProduct[0]);
+    }
+    
   }, [dispatch, productId]);
+
+  useEffect(() => {
+    dispatch(fetchProducts());
+    dispatch(fetchProductById(productId));
+  }, [dispatch, productId]); // Fetch products when productId changes
+  
+  useEffect(() => {
+    if (currentProduct && currentProduct.length > 0) {
+      storeProductInAsyncStorage(currentProduct[0]);
+    }
+  }, [currentProduct]); // Store product when it updates
+  
+  const storeProductInAsyncStorage = async (product) => {
+    try {
+      const storedProducts = await AsyncStorage.getItem("recentProducts");
+      let productList = storedProducts ? JSON.parse(storedProducts) : [];
+  
+      // Remove duplicate entries
+      productList = productList.filter((item) => item.productID !== product.productID);
+  
+      // Add new product at the beginning
+      productList.unshift(product);
+  
+      // Keep only the first 12 entries
+      if (productList.length > 12) {
+        productList = productList.slice(0, 12);
+      }
+  
+      await AsyncStorage.setItem("recentProducts", JSON.stringify(productList));
+     
+    } catch (error) {
+     
+    }
+  };
+  
+  
 
   const handleAddToCart = () => {
     const cartData = {
@@ -83,7 +124,6 @@ const ProductDetailsScreen = () => {
       </View>
     );
   }
-  
 
   const product = currentProduct[0];
   const imageUrl = `https://smfteapi.salesmate.app/Media/Products_Images/${product.productImage.split("\\").pop()}`;
@@ -102,48 +142,42 @@ const ProductDetailsScreen = () => {
         <View style={styles.contentContainer}>
           <Text style={styles.productName}>{product.productName}</Text>
           <View style={styles.priceContainer}>
-  <Text style={styles.productPrice}>{formatPrice(product.price)}</Text>
-  {product.oldPrice ? (
-    <Text style={styles.oldPrice}>{formatPrice(product.oldPrice)}</Text>
-  ) : null}
-</View>
+            <Text style={styles.productPrice}>{formatPrice(product.price)}</Text>
+            {product.oldPrice ? (
+              <Text style={styles.oldPrice}>{formatPrice(product.oldPrice)}</Text>
+            ) : null}
+          </View>
 
-
-
-<View style={styles.descriptionContainer}>
-  <Text style={styles.sectionTitle}>Description</Text>
-  <Text>{product.description || "No description available."}</Text>
-</View>
-
+          <View style={styles.descriptionContainer}>
+            <Text style={styles.sectionTitle}>Description</Text>
+            <Text>{product.description || "No description available."}</Text>
+          </View>
         </View>
       </ScrollView>
 
       <View style={styles.bottomContainer}>
-  <TouchableOpacity style={styles.shareButton} onPress={handleShare}>
-    <Icon name="share" size={24} color="#fff" />
-    {/* Wrap text in a Text component */}
-    <Text style={styles.shareText}>Share</Text>
-  </TouchableOpacity>
-  <TouchableOpacity
-    style={[
-      styles.addToCartButton,
-      isAddingToCart && styles.addToCartButtonDisabled,
-    ]}
-    onPress={handleAddToCart}
-    disabled={isAddingToCart}
-  >
-    {isAddingToCart ? (
-      <ActivityIndicator color="#fff" />
-    ) : (
-      <>
-        <Icon name="shopping-cart" size={24} color="#fff" />
-        {/* Wrap text in a Text component */}
-        <Text style={styles.addToCartText}>Add to Cart</Text>
-      </>
-    )}
-  </TouchableOpacity>
-</View>
-
+        <TouchableOpacity style={styles.shareButton} onPress={handleShare}>
+          <Icon name="share" size={24} color="#fff" />
+          <Text style={styles.shareText}>Share</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[
+            styles.addToCartButton,
+            isAddingToCart && styles.addToCartButtonDisabled,
+          ]}
+          onPress={handleAddToCart}
+          disabled={isAddingToCart}
+        >
+          {isAddingToCart ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <>
+              <Icon name="shopping-cart" size={24} color="#fff" />
+              <Text style={styles.addToCartText}>Add to Cart</Text>
+            </>
+          )}
+        </TouchableOpacity>
+      </View>
 
       <Modal visible={isImageModalVisible} transparent animationType="fade">
         <View style={styles.modalContainer}>
@@ -159,6 +193,7 @@ const ProductDetailsScreen = () => {
     </View>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#fff" },
