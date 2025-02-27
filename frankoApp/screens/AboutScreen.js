@@ -10,10 +10,6 @@ import {
 } from 'react-native';
 import { Card, Divider, Tab, TabView } from 'react-native-elements';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-<<<<<<< HEAD
-=======
-
->>>>>>> 4418917 (Initial commit)
 const { width: screenWidth } = Dimensions.get('window'); // Get screen width
 
 const AboutScreen = () => {

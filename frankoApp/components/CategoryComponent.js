@@ -15,9 +15,9 @@ const { width } = Dimensions.get("window");
 const categories = [
   { id: "51d1fff2", image: require("../assets/smart.jpg"), label: "Phones", path: "Phones" },
   { id: "12f11417", image: require("../assets/computer1.jpg"), label: "Computers", path: "Computers" },
-  { id: "db54033b", image: require("../assets/acf.jpeg"), label: "Air-Condition", path: "AirCondition" },
+  { id: "db54033b", image: require("../assets/ac.jpeg"), label: "Air-Condition", path: "AirCondition" },
   { id: "38f7245d", image: require("../assets/speaker.jpg"), label: "Speakers", path: "Speakers" },
-  { id: "2cfdb823", image: require("../assets/acc.jpg"), label: "Accessories", path: "Accessories" },
+  { id: "2cfdb823", image: require("../assets/charg.jpeg"), label: "Accessories", path: "Accessories" },
   { id: "b51e02c2", image: require("../assets/smart.jpeg"), label: "Television", path: "Television" },
   { id: "4f5076f8", image: require("../assets/fridge.jpg"), label: "Fridge", path: "Fridge" },
   { id: "9170b363", image: require("../assets/blender.jpg"), label: "Appliances", path: "Appliances" },

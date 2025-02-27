@@ -103,11 +103,7 @@ const styles = StyleSheet.create({
   },
   title: {
     color: '#fff',
-<<<<<<< HEAD
     fontSize: 14,
-=======
-    fontSize: 18,
->>>>>>> 4418917 (Initial commit)
     fontWeight: 'bold',
     marginBottom: 10,
   },

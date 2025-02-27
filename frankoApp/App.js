@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { SafeAreaView, StyleSheet, View, Text, ActivityIndicator, Image, Easing} from 'react-native';
+import { SafeAreaView, StyleSheet, View, Text, ActivityIndicator, Image, StatusBar} from 'react-native';
 import { Provider } from 'react-redux';
 import { store } from './redux/store';
 import { NavigationContainer } from '@react-navigation/native';
@@ -27,6 +27,17 @@ import PaymentGatewayScreen from './screens/PaymentGatewayScreen';
 import OrderPlacedScreen from './screens/OrderPlacedScreen';
 import { useDispatch } from 'react-redux';
 import {fetchProduct} from './redux/slice/productSlice';
+import ShowroomScreen from './screens/ShowroomScreen';
+import PhoneScreen from './screens/Categories/PhoneScreen';
+import SpeakerScreen from './screens/Categories/SpeakerScreen';
+import AccessoriesScreen from './screens/Categories/AccessoriesScreen';
+import ComputerScreen from './screens/Categories/ComputerScreen';
+import TelevisionScreen from './screens/Categories/TelevisionScreen';
+import FanScreen from './screens/Categories/FanScreen.js';
+import AirConditionScreen from './screens/Categories/AirConditionScreen';
+import ComboScreen from './screens/Categories/ComboScreen';
+import ApplianceScreen from './screens/Categories/ApplianceScreen';
+import FridgeScreen from './screens/Categories/FridgeScreen';
 
 
 const Stack = createStackNavigator();
@@ -80,6 +91,19 @@ const AppStack = () => {
       <Stack.Screen name="Products" component={ProductsScreenWithFooter} />
       <Stack.Screen name="PaymentGatewayScreen" component={PaymentGatewayScreen} />
       <Stack.Screen name = "OrderPlacedScreen" component={OrderPlacedScreen}/>
+      <Stack.Screen name = "showroom" component={ShowroomScreen}/>
+      <Stack.Screen name="Phones" component={PhoneScreen} />
+      <Stack.Screen name = "Speakers" component = {SpeakerScreen}/>
+      <Stack.Screen name="Accessories" component={AccessoriesScreen} />
+      <Stack.Screen name="Computers" component={ComputerScreen} />
+      <Stack.Screen name="Television" component={TelevisionScreen} />
+      <Stack.Screen name="Fridge" component={FridgeScreen} />
+      <Stack.Screen name="Fan" component={FanScreen} />
+      <Stack.Screen name="AirCondition" component={AirConditionScreen} /> 
+      <Stack.Screen name="Combo" component={ComboScreen} />
+      <Stack.Screen name="Appliances" component={ApplianceScreen} />
+
+      
     </Stack.Navigator>
   );
 };
@@ -121,6 +145,7 @@ const App = () => {
     <Provider store={store}>
       <NavigationContainer>
         <SafeAreaView style={styles.container}>
+           <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
           {showWelcome ? (
             <WelcomeScreen onReady={handleReady} />
           ) : (
@@ -184,6 +209,7 @@ export default App;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#fff',
   
   },
   contentContainer: {

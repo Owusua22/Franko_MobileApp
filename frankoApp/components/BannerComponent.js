@@ -3,7 +3,6 @@ import { View, TouchableOpacity, Image, StyleSheet, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons'; // Install @expo/vector-icons
 
 export default function BannerComponent() {
-<<<<<<< HEAD
   
   return (
     <View style={styles.container}>
@@ -12,23 +11,6 @@ export default function BannerComponent() {
         style={styles.image}
       />
     
-=======
-  const handleBuyNow = () => {
-    // Logic for Buy Now button action
-    console.log("Buy Now button pressed!");
-  };
-
-  return (
-    <View style={styles.container}>
-      <Image
-        source={require('../assets/newbanner.jpg')} // Replace with your image URL
-        style={styles.image}
-      />
-      <TouchableOpacity style={styles.button} onPress={handleBuyNow}>
-        <Ionicons name="cart" size={20} color="#fff" />
-        <Text style={styles.buttonText}>Buy Now</Text>
-      </TouchableOpacity>
->>>>>>> 4418917 (Initial commit)
     </View>
   );
 }
@@ -38,11 +20,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'flex-end', // Align button to the bottom
     alignItems: 'center',
-<<<<<<< HEAD
     padding: 2,
-=======
-    padding: 5,
->>>>>>> 4418917 (Initial commit)
   },
   image: {
    

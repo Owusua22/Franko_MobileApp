@@ -30,10 +30,7 @@ const SignupScreen = () => {
     address: '',
     password: '',
     accountType: 'customer', // Default account type
-<<<<<<< HEAD
-    accountStatus: '1', // Default account status (active) when signing up
-=======
->>>>>>> 4418917 (Initial commit)
+    accountStatus: '1',
   });
   const [loading, setLoading] = useState(false);
 
@@ -42,16 +39,13 @@ const SignupScreen = () => {
     setFormData((prevState) => ({
       ...prevState,
       customerAccountNumber: accountNumber,
-<<<<<<< HEAD
-      accountStatus: '1', // Default account status (active) when signing up
-=======
->>>>>>> 4418917 (Initial commit)
+      accountStatus: '1',
     }));
   }, []);
 
   useEffect(() => {
     if (message) {
-      console.log('Redux Message:', message);
+     
     }
   }, [message]);
 
@@ -78,6 +72,8 @@ const SignupScreen = () => {
       accountType: 'customer', // Always customer
       customerAccountNumber,
       email: email || '',
+       accountStatus: '1',
+
     };
 
     try {

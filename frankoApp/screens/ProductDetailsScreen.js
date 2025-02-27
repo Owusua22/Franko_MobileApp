@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -9,10 +10,7 @@ import {
   StyleSheet,
   Share,
   ActivityIndicator,
-<<<<<<< HEAD
   Modal,
-=======
->>>>>>> 4418917 (Initial commit)
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchProductById, fetchProducts } from "../redux/slice/productSlice";
@@ -36,17 +34,10 @@ const ProductDetailsScreen = () => {
   const { productId } = route.params;
   const currentProduct = useSelector((state) => state.products.currentProduct);
   const { loading } = useSelector((state) => state.products);
-<<<<<<< HEAD
   const cartId = useSelector((state) => state.cart.cartId);
 
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [isImageModalVisible, setIsImageModalVisible] = useState(false);
-=======
-  const cartItems = useSelector((state) => state.cart.cartItems);
-  const cartId = useSelector((state) => state.cart.cartId);
-
-  const [isAddingToCart, setIsAddingToCart] = useState(false);
->>>>>>> 4418917 (Initial commit)
 
   useEffect(() => {
     dispatch(fetchProducts());
@@ -84,10 +75,6 @@ const ProductDetailsScreen = () => {
     }
   };
 
-<<<<<<< HEAD
-=======
-  // Show activity indicator while loading
->>>>>>> 4418917 (Initial commit)
   if (loading || !currentProduct || currentProduct.length === 0) {
     return (
       <View style={styles.loaderContainer}>
@@ -96,10 +83,7 @@ const ProductDetailsScreen = () => {
       </View>
     );
   }
-<<<<<<< HEAD
   
-=======
->>>>>>> 4418917 (Initial commit)
 
   const product = currentProduct[0];
   const imageUrl = `https://smfteapi.salesmate.app/Media/Products_Images/${product.productImage.split("\\").pop()}`;
@@ -108,24 +92,15 @@ const ProductDetailsScreen = () => {
     <View style={styles.container}>
       <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
         <Icon name="arrow-back" size={24} color="red" />
-<<<<<<< HEAD
       </TouchableOpacity>
 
       <TouchableOpacity onPress={() => setIsImageModalVisible(true)} style={styles.imageContainer}>
         <Image source={{ uri: imageUrl }} style={styles.productImage} />
       </TouchableOpacity>
-=======
-      
-      </TouchableOpacity>
-      <View style={styles.imageContainer}>
-        <Image source={{ uri: imageUrl }} style={styles.productImage} />
-      </View>
->>>>>>> 4418917 (Initial commit)
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.contentContainer}>
           <Text style={styles.productName}>{product.productName}</Text>
-<<<<<<< HEAD
           <View style={styles.priceContainer}>
   {product.oldPrice ? (
     <Text style={styles.oldPrice}>{formatPrice(product.oldPrice)}</Text>
@@ -139,19 +114,10 @@ const ProductDetailsScreen = () => {
   <Text>{product.description || "No description available."}</Text>
 </View>
 
-=======
-          <Text style={styles.productPrice}>{formatPrice(product.price)}</Text>
-
-          <View style={styles.descriptionContainer}>
-            <Text style={styles.sectionTitle}>Description</Text>
-            <Text>{product.description}</Text>
-          </View>
->>>>>>> 4418917 (Initial commit)
         </View>
       </ScrollView>
 
       <View style={styles.bottomContainer}>
-<<<<<<< HEAD
   <TouchableOpacity style={styles.shareButton} onPress={handleShare}>
     <Icon name="share" size={24} color="#fff" />
     {/* Wrap text in a Text component */}
@@ -189,30 +155,6 @@ const ProductDetailsScreen = () => {
           </TouchableOpacity>
         </View>
       </Modal>
-=======
-        <TouchableOpacity style={styles.shareButton} onPress={handleShare}>
-          <Icon name="share" size={24} color="#fff" />
-          <Text style={styles.shareText}>Share</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[
-            styles.addToCartButton,
-            isAddingToCart && styles.addToCartButtonDisabled,
-          ]}
-          onPress={handleAddToCart}
-          disabled={isAddingToCart}
-        >
-          {isAddingToCart ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <>
-              <Icon name="shopping-cart" size={24} color="#fff" />
-              <Text style={styles.addToCartText}>Add to Cart</Text>
-            </>
-          )}
-        </TouchableOpacity>
-      </View>
->>>>>>> 4418917 (Initial commit)
     </View>
   );
 };
@@ -227,7 +169,6 @@ const styles = StyleSheet.create({
   },
   loadingText: { marginTop: 10, fontSize: 16, color: "#555" },
   imageContainer: { height: 350, backgroundColor: "#f8f8f8" },
-<<<<<<< HEAD
   productImage: { width: 370, height: 350, resizeMode: "cover" },
   scrollContent: { paddingBottom: 100 },
   contentContainer: { padding: 16 },
@@ -237,15 +178,6 @@ const styles = StyleSheet.create({
   productPrice: { fontSize: 18, color: "#e60000", fontWeight: "bold" },
   descriptionContainer: { marginTop: 16 },
   sectionTitle: { fontSize: 16, fontWeight: "bold", marginBottom: 8 },
-=======
-  productImage: { width: "100%", height: "100%", resizeMode: "cover" },
-  scrollContent: { paddingBottom: 100 },
-  contentContainer: { padding: 16 },
-  productName: { fontSize: 18, fontWeight: "bold", marginBottom: 8, color: "#333" },
-  productPrice: { fontSize: 14, color: "#e60000", marginBottom: 16 , fontWeight: "bold"},
-  descriptionContainer: { marginTop: 16 },
-  sectionTitle: { fontSize: 14, fontWeight: "bold", marginBottom: 8 },
->>>>>>> 4418917 (Initial commit)
   bottomContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -261,10 +193,6 @@ const styles = StyleSheet.create({
     flex: 1,
     marginRight: 8,
   },
-<<<<<<< HEAD
-=======
- 
->>>>>>> 4418917 (Initial commit)
   shareText: { color: "#fff", marginLeft: 8 },
   addToCartButton: {
     backgroundColor: "#BF211E",
@@ -273,7 +201,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     padding: 10,
     borderRadius: 20,
-<<<<<<< HEAD
     flex: 2,
   },
   addToCartButtonDisabled: { backgroundColor: "#BF211E" },
@@ -289,12 +216,3 @@ const styles = StyleSheet.create({
 });
 
 export default ProductDetailsScreen;
-=======
-    flex: 1,
-  },
-  addToCartButtonDisabled: { backgroundColor: "#BF211E" },
-  addToCartText: { color: "#fff", marginLeft: 8 },
-});
-
-export default ProductDetailsScreen;
->>>>>>> 4418917 (Initial commit)
