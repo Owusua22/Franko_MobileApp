@@ -66,7 +66,8 @@ const CheckoutScreen = ({ navigation }) => {
     fetchData();
   }, []);
   
-
+  
+  
   const handleCheckout = async () => {
     if (!paymentMethod) {
         Alert.alert("Error", "Please select a payment method to proceed.");
@@ -216,10 +217,10 @@ const calculateTotalAmount = () => {
 };
 
 // Callback function to reload shipping details
-const handleShippingDetailsSave = (address) => {
-  setRecipientAddress(address); // Update address immediately
+const handleShippingUpdate = (details) => {
+  setShippingDetails(details);
+  setRecipientAddress(details.location || "Add Address");
 };
-
   // Conditionally add Cash on Delivery to available payment methods if locationCharge > 0
   const availablePaymentMethods = ["Mobile Money", "Credit/Debit Card"];
   if (shippingDetails.locationCharge > 0 && shippingDetails.locationCharge !== "N/A") {
@@ -436,8 +437,9 @@ const handleContact = (type) => {
       <ShippingComponent
   isVisible={shippingModalVisible}
   onClose={() => setShippingModalVisible(false)}
-  onShippingDetailsSave={handleShippingDetailsSave} // Pass the callback
+  onShippingUpdate={handleShippingUpdate}
 />
+
 
 
     </View>

@@ -1,13 +1,13 @@
 import React from 'react';
-import { View, TouchableOpacity, Image, StyleSheet, Text } from 'react-native';
-import { Ionicons } from '@expo/vector-icons'; // Install @expo/vector-icons
+import { View, Image, StyleSheet } from 'react-native';
+
 
 export default function BannerComponent() {
   
   return (
     <View style={styles.container}>
       <Image
-        source={require('../assets/vb.jpg')} // Replace with your image URL
+        source={require('../assets/bn.jpeg')} // Replace with your image URL
         style={styles.image}
       />
     

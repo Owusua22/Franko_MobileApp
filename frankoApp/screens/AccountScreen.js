@@ -123,16 +123,6 @@ const AccountScreen = () => {
         </Text>
       </View>
 
-      {/* Shipping Information */}
-      <View style={styles.card}>
-        <Text style={styles.sectionTitle}>Shipping Information</Text>
-        <TouchableOpacity style={styles.button} onPress={() => setModalVisible(true)}>
-          <Text style={styles.buttonText}>
-            {shippingDetails ? "Update Shipping Details" : "Select Shipping Details"}
-          </Text>
-        </TouchableOpacity>
-      </View>
-
       {/* Delete Account Button (Only if customer details exist) */}
       {customerData && (
         <TouchableOpacity style={styles.deleteButton} onPress={handleDeleteAccount}>
@@ -157,7 +147,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 5,
     elevation: 3,
-    marginBottom: 16,
+    marginBottom: 10,
   },
   sectionTitle: {
     fontSize: 18,
@@ -204,6 +194,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     alignItems: "center",
     marginVertical: 16,
+    marginBottom: 20,
   },
   deleteButtonText: {
     color: "#fff",

@@ -185,9 +185,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: screenWidth > 600 ? 20 : 10,
-    paddingVertical: 10,
+   
     backgroundColor: '#f7f7f7',
-    marginBottom: 60,
+ 
   },
   header: {
     flexDirection: 'row',
@@ -294,12 +294,12 @@ const styles = StyleSheet.create({
     
   
     productImage: {
-      width: '100%',
-      height: screenWidth > 600 ? 120 : 100,
-      borderRadius: 10,
+      width: "100%",
+      height: 120,
+      resizeMode: "contain",
     },
     productName: {
-      fontSize: screenWidth > 600 ? 16 : 14,
+      fontSize: 12,
       fontWeight: 'bold',
       marginTop: 10,
      
@@ -310,12 +310,12 @@ const styles = StyleSheet.create({
       
     },
     productPrice: {
-      fontSize: 14,
+      fontSize: 12,
       color: 'red',
       fontWeight: 'bold',
     },
     oldPrice: {
-      fontSize: 12,
+      fontSize: 10,
       color: '#777',
       textDecorationLine: 'line-through',
       marginLeft: 8,
@@ -337,6 +337,7 @@ const styles = StyleSheet.create({
       paddingHorizontal: 10,
       paddingVertical: 4,
       borderRadius: 8,
+      marginBottom: 10,
     },
     showroomButtonText: {
       color: "#fff",

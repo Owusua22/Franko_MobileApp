@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo } from "react";
 import {
   View,
   Text,
@@ -10,7 +10,6 @@ import {
   Dimensions,
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchCategories } from "../../redux/slice/categorySlice";
 import { fetchProductsByCategory } from "../../redux/slice/productSlice";
 import { useNavigation } from "@react-navigation/native";
 import { AntDesign } from "@expo/vector-icons";
@@ -20,39 +19,20 @@ const screenWidth = Dimensions.get("window").width;
 const ApplianceScreen = () => {
   const dispatch = useDispatch();
   const navigation = useNavigation();
-  const { categories, loading: categoriesLoading } = useSelector(
-    (state) => state.categories
-  );
   const { productsByCategory = {}, loading: productsLoading } = useSelector(
     (state) => state.products
   );
-  const [filteredProducts, setFilteredProducts] = useState([]);
+const hardcodedCategoryId = "9170b363-bb16-4980-83a1-7e3a3bbba964"
+  
+useEffect(() => {
+  dispatch(fetchProductsByCategory(hardcodedCategoryId));
+}, [dispatch, hardcodedCategoryId]);
 
-  useEffect(() => {
-    if (!categories.length) {
-      dispatch(fetchCategories());
-    }
-  }, [dispatch, categories.length]);
-
-  useEffect(() => {
-    if (categories.length) {
-      categories.forEach((category) => {
-        if (!productsByCategory[category.categoryId]) {
-          dispatch(fetchProductsByCategory(category.categoryId));
-        }
-      });
-    }
-  }, [dispatch, categories, productsByCategory]);
-
-  useEffect(() => {
-    const products =
-      productsByCategory["9170b363-bb16-4980-83a1-7e3a3bbba964"] || [];
-    const sortedProducts = products
-      .slice()
-      .sort((a, b) => new Date(b.dateCreated) - new Date(a.dateCreated));
-    setFilteredProducts(sortedProducts);
-  }, [productsByCategory]);
-
+const filteredProducts = useMemo(() => {
+  return (productsByCategory[hardcodedCategoryId] || [])
+    .slice()
+    .sort((a, b) => new Date(b.dateCreated) - new Date(a.dateCreated));
+}, [productsByCategory, hardcodedCategoryId]);
   const formatPrice = (amount) =>
     amount.toLocaleString(undefined, {
       minimumFractionDigits: 2,
@@ -68,7 +48,7 @@ const ApplianceScreen = () => {
       .pop()}`;
   };
 
-  if (categoriesLoading || productsLoading) {
+  if ( productsLoading) {
     return (
       <View style={styles.loaderContainer}>
         <ActivityIndicator size="large" color="#00cc66" />
@@ -152,7 +132,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 10,
-    marginBottom: 20,
+  
   },
   loaderContainer: {
     flex: 1,
@@ -185,12 +165,12 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 15,
     backgroundColor: "#fff",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 4,
-    maxWidth: "48%",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.8,
+    shadowRadius: 2,
+    elevation: 5,
+    transform: [{ scale: 1 }],
+    maxWidth: "48%"
   },
   imageContainer: {
     position: "relative",

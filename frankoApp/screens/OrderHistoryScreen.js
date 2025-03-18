@@ -8,12 +8,14 @@ import {View,Text,FlatList, TouchableOpacity, ActivityIndicator,
   Button,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { useNavigation } from "@react-navigation/native";
 import moment from "moment";
 import noOrders from "../assets/noOrders.avif";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const OrderHistoryScreen = () => {
   const dispatch = useDispatch();
+   const navigation = useNavigation();
   const ordersData = useSelector(state => state.order); // Ensure that ordersData is pointing to the state correctly
 
   // Access specific values from ordersData
@@ -164,7 +166,8 @@ const OrderHistoryScreen = () => {
           <Button
             title="Start Shopping"
             color="#f00"
-            onPress={() => alert("Redirect to shopping page")}
+            onPress={() => navigation.navigate("home", { screen: "Products" })}
+
           />
         </View>
       )}

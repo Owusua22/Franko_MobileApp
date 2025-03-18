@@ -1,98 +1,92 @@
-import React from 'react';
-import { View, Dimensions, StyleSheet, Image, TouchableOpacity } from 'react-native';
-import Swiper from 'react-native-swiper';
+import React, { useEffect, useState } from "react";
+import { View, Dimensions, StyleSheet, Image, Text } from "react-native";
+import Swiper from "react-native-swiper";
+import { useDispatch, useSelector } from "react-redux";
+import { getBannerPageAdvertisment } from "../redux/slice/advertismentSlice";
 
-
-const { width, height } = Dimensions.get('window');
+const { width } = Dimensions.get("window"); // Get full screen width
+const backendBaseURL = "https://smfteapi.salesmate.app";
 
 const CarouselComponent = () => {
-  const carouselItems = [
-    { id: '1', image: require('../assets/newbanner.jpg'), title: 'shop now' },
-    { id: '2', image: require('../assets/sama16.jpg'), title: 'shop now' },
-    { id: '3', image: require('../assets/sam.jpg'), title: 'shop now' },
-  ];
+  const dispatch = useDispatch();
+  const [loading, setLoading] = useState(true);
+  const { advertisments = [] } = useSelector((state) => state.advertisment);
 
-  const handleShopNow = (title) => {
-    console.log(`Shopping for ${title}`);
-  };
+  useEffect(() => {
+    dispatch(getBannerPageAdvertisment()).finally(() => setLoading(false));
+  }, [dispatch]);
+
   return (
     <View style={styles.container}>
-      <Swiper
-        style={styles.wrapper}
-        autoplay
-        autoplayTimeout={5}
-        loop
-        dotColor="#fff"
-        activeDotColor="#ff6347"
-        removeClippedSubviews={false} // Improves performance on Android
-      >
-        {carouselItems.map((item) => (
-          <View key={item.id} style={styles.card}>
-            <Image source={item.image} style={styles.image} />
-            
-           
-          </View>
-        ))}
-      </Swiper>
+      {loading ? (
+        <Image source={require("../assets/bn.jpeg")} style={styles.image} />
+      ) : advertisments.length === 0 ? (
+        <Text style={styles.noAdsText}>No Advertisements Available</Text>
+      ) : (
+        <Swiper
+          autoplay={advertisments.length > 1} 
+          autoplayTimeout={5}
+          loop={advertisments.length > 1}
+          index={0}
+          showsPagination={true}
+          dotStyle={styles.dot}
+          activeDotStyle={styles.activeDot}
+          containerStyle={styles.swiperContainer}
+        >
+          {advertisments.map((ad, index) => (
+            <View key={index} style={styles.slide}>
+              <Image
+                source={{
+                  uri: `${backendBaseURL}/Media/Ads/${ad.fileName.split("\\").pop()}`,
+                }}
+                style={styles.image}
+              />
+            </View>
+          ))}
+        </Swiper>
+      )}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
   },
-  wrapper: {
-    height: 200,
+  swiperContainer: {
+    width: "100%", // Ensure Swiper takes full width
+    height: 200, // Adjust height if needed
   },
-  card: {
-    borderRadius: 10,
-    padding: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
+  slide: {
+    width: "100%", // Ensure slide fills the container
+    justifyContent: "center",
+    alignItems: "center",
   },
   image: {
-    width: '100%',
-    height: '100%',
-    borderRadius: 10,
-    resizeMode: 'cover',
+    width: width, // Full screen width
+    height: 200, 
+    resizeMode: "cover", // Ensure image covers the full width
   },
-  title: {
-    marginTop: 10,
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  buttonGroup: {
-    flexDirection: 'row',
-    marginTop: 15,
-  },
-  shopButton: {
-    backgroundColor: '#ff6347',
-    borderRadius: 30,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginRight: 10,
-  },
-  buyButton: {
-    backgroundColor: '#32cd32', // Green color for the "Buy Now" button
-    borderRadius: 30,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  cartIcon: {
-    marginRight: 10,
-  },
-  buttonText: {
-    color: '#fff',
+  noAdsText: {
     fontSize: 16,
-    fontWeight: 'bold',
+    color: "#777",
+    textAlign: "center",
+    marginBottom: 10,
+  },
+  dot: {
+    backgroundColor: "#ccc",
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    margin: 3,
+  },
+  activeDot: {
+    backgroundColor: "#007AFF",
+    width: 10,
+    height: 10,
+    borderRadius: 5,
   },
 });
 

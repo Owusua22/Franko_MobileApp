@@ -102,11 +102,12 @@ const ProductDetailsScreen = () => {
         <View style={styles.contentContainer}>
           <Text style={styles.productName}>{product.productName}</Text>
           <View style={styles.priceContainer}>
+  <Text style={styles.productPrice}>{formatPrice(product.price)}</Text>
   {product.oldPrice ? (
     <Text style={styles.oldPrice}>{formatPrice(product.oldPrice)}</Text>
   ) : null}
-  <Text style={styles.productPrice}>{formatPrice(product.price)}</Text>
 </View>
+
 
 
 <View style={styles.descriptionContainer}>
@@ -173,9 +174,9 @@ const styles = StyleSheet.create({
   scrollContent: { paddingBottom: 100 },
   contentContainer: { padding: 16 },
   productName: { fontSize: 18, fontWeight: "bold", color: "#333" },
-  priceContainer: { flexDirection: "row", alignItems: "center", marginVertical: 8 },
-  oldPrice: { fontSize: 14, color: "#888", textDecorationLine: "line-through", marginLeft: 8 },
-  productPrice: { fontSize: 18, color: "#e60000", fontWeight: "bold" },
+  priceContainer: { flexDirection: "row", alignItems: "center", marginVertical: 8, gap: 8 },
+  oldPrice: { fontSize: 12, color: "#888", textDecorationLine: "line-through", marginLeft: 8 },
+  productPrice: { fontSize: 18, color: "#e60000", fontWeight: "bold"},
   descriptionContainer: { marginTop: 16 },
   sectionTitle: { fontSize: 16, fontWeight: "bold", marginBottom: 8 },
   bottomContainer: {

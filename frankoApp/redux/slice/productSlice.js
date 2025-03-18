@@ -98,22 +98,28 @@ export const fetchProductsByCategory = createAsyncThunk('products/fetchProductsB
   return { categoryId, products: response.data.sort((a, b) => new Date(b.dateCreated) - new Date(a.dateCreated)) };
 });
 export const fetchProductByShowroomAndRecord = createAsyncThunk(
-    "products/fetchProductByShowroomAndRecord",
-    async ({ showRoomCode, recordNumber }) => {
-      try {
-        const response = await axios.get(`${API_BASE_URL}/Product/Product-Get-by-ShowRoom_RecordNumber`, {
-          params: {
-            ShowRommCode: showRoomCode, // Fix parameter name
-            RecordNumber: recordNumber,
-          },
-        });
-        return { showRoomCode, products: response.data }; // Ensure we return data mapped to the showroom
-      } catch (error) {
-        console.error("Error fetching product by showroom and record number:", error);
-        throw error;
-      }
+  "products/fetchProductByShowroomAndRecord",
+  async ({ showRoomCode, recordNumber }) => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/Product/Product-Get-by-ShowRoom_RecordNumber`, {
+        params: {
+          ShowRommCode: showRoomCode, // Fix parameter name
+          RecordNumber: recordNumber,
+        },
+      });
+
+      // Sort products by "dateCreated" in descending order
+      const sortedProducts = response.data.sort(
+        (a, b) => new Date(b.dateCreated) - new Date(a.dateCreated)
+      );
+
+      return { showRoomCode, products: sortedProducts }; // Return sorted data
+    } catch (error) {
+      console.error("Error fetching product by showroom and record number:", error);
+      throw error;
     }
-  );
+  }
+);
 
 // Create the product slice
 const productSlice = createSlice({

@@ -29,18 +29,20 @@ const ProductsScreen = () => {
   const [loadingMore, setLoadingMore] = useState(false);
 
   const itemsPerPage = 24;
-
   useEffect(() => {
-    setLoadingMore(true);
+    setLoadingMore(true); // Show loading indicator when fetching
     dispatch(fetchPaginatedProducts({ pageNumber: currentPage, pageSize: itemsPerPage })).then(
       (response) => {
         if (response.payload) {
-          setAllProducts((prevProducts) => [...prevProducts, ...response.payload]);
+          setAllProducts((prevProducts) =>
+            currentPage === 1 ? response.payload : [...prevProducts, ...response.payload]
+          );
         }
-        setLoadingMore(false);
+        setLoadingMore(false); // Hide loading indicator when done
       }
     );
-  }, [currentPage]); // Removed dispatch from dependencies
+  }, [currentPage]);
+   // Removed dispatch from dependencies
 
   const filteredProducts = useMemo(() => {
     return allProducts.filter((product) => {
@@ -98,31 +100,39 @@ const ProductsScreen = () => {
       </TouchableOpacity>
     );
   };
-
   return (
     <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <AntDesign name="arrowleft" size={24} color="white" />
-        </TouchableOpacity>
-        <Text style={styles.title}>Products</Text>
-      
-      </View>
-
-      {/* Product List */}
-      <FlatList
-        data={filteredProducts}
-        keyExtractor={(item) => item.productID.toString()}
-        numColumns={2}
-        contentContainerStyle={styles.productGrid}
-        onEndReached={() => setCurrentPage((prevPage) => prevPage + 1)}
-        onEndReachedThreshold={0.1}
-        ListFooterComponent={loadingMore ? <ActivityIndicator size="small" color="red" /> : null}
-        renderItem={renderItem}
-      />
+      {/* Show full-screen loader when first loading products */}
+      {loadingMore && currentPage === 1 ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#16A34A" />
+        </View>
+      ) : (
+        <>
+          {/* Header */}
+          <View style={styles.header}>
+            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+              <AntDesign name="arrowleft" size={24} color="white" />
+            </TouchableOpacity>
+            <Text style={styles.title}>Products</Text>
+          </View>
+  
+          {/* Product List */}
+          <FlatList
+            data={filteredProducts}
+            keyExtractor={(item) => item.productID.toString()}
+            numColumns={2}
+            contentContainerStyle={styles.productGrid}
+            onEndReached={() => setCurrentPage((prevPage) => prevPage + 1)}
+            onEndReachedThreshold={0.1}
+            ListFooterComponent={loadingMore ? <ActivityIndicator size="small" color="red" /> : null}
+            renderItem={renderItem}
+          />
+        </>
+      )}
     </View>
   );
+  
 };
 
 export default ProductsScreen;
@@ -131,13 +141,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-    padding: 16,
+    padding: 6,
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#16A34A",
-    padding: 10,
+    padding: 6,
     color: "white",
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
@@ -223,4 +233,11 @@ const styles = StyleSheet.create({
     height: 40,
     resizeMode: "contain",
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.8)", // Semi-transparent background
+  },
+  
 });

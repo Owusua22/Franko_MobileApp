@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { SafeAreaView, StyleSheet, View, Text, ActivityIndicator, Image, StatusBar} from 'react-native';
+import { SafeAreaView, StyleSheet, View, Text, ActivityIndicator, Image} from 'react-native';
+import { StatusBar } from "expo-status-bar";
 import { Provider } from 'react-redux';
 import { store } from './redux/store';
 import { NavigationContainer } from '@react-navigation/native';
@@ -26,7 +27,6 @@ import PolicyScreen from './screens/PolicyScreen';
 import PaymentGatewayScreen from './screens/PaymentGatewayScreen';
 import OrderPlacedScreen from './screens/OrderPlacedScreen';
 import { useDispatch } from 'react-redux';
-import {fetchProduct} from './redux/slice/productSlice';
 import ShowroomScreen from './screens/ShowroomScreen';
 import PhoneScreen from './screens/Categories/PhoneScreen';
 import SpeakerScreen from './screens/Categories/SpeakerScreen';
@@ -38,6 +38,7 @@ import AirConditionScreen from './screens/Categories/AirConditionScreen';
 import ComboScreen from './screens/Categories/ComboScreen';
 import ApplianceScreen from './screens/Categories/ApplianceScreen';
 import FridgeScreen from './screens/Categories/FridgeScreen';
+import { Ionicons } from 'react-native-vector-icons'; // Import icons
 
 
 const Stack = createStackNavigator();
@@ -49,16 +50,16 @@ const WelcomeScreen = ({ onReady }) => {
   useEffect(() => {
     const fetchData = async () => {
       await Promise.all([
-        new Promise((resolve) => setTimeout(resolve)), // Simulated delay
-        dispatch(fetchProduct()) // Fetch products
+        new Promise((resolve) => setTimeout(resolve, 5000)), // 5-second delay
       ]);
-
+  
       setLoading(false);
       onReady(); // Navigate to the home screen
     };
-
+  
     fetchData();
   }, [dispatch, onReady]);
+  
 
   return (
     <View style={styles.welcomeContainer}>
@@ -109,32 +110,62 @@ const AppStack = () => {
 };
 
 const isCartEnabled = false;
-const AppDrawer = () => (
-
-
-
+const AppDrawer = ({ isCartEnabled }) => (
   <Drawer.Navigator
-  screenOptions={{
-    drawerType: 'front',
-    headerShown: false,
-    swipeEdgeWidth: 50,
-    drawerStyle: {
-      width: '50%',
-      backgroundColor: '#ffffff',
-    },
-    animation: 'slide',
-  }}
->
-  <Drawer.Screen name="home" component={AppStack} />
-  {isCartEnabled && <Drawer.Screen name="cart" component={CartScreen} />}
-  <Drawer.Screen name="Orders" component={OrderHistoryScreen} />
-  <Drawer.Screen name="About" component={AboutScreen} />
-  <Drawer.Screen name="Contact" component={ContactUsScreen} />
-  <Drawer.Screen name="Terms" component={PolicyScreen} />
-</Drawer.Navigator>
+    screenOptions={({ route }) => ({
+      drawerType: 'front',
+      headerShown: false,
+      swipeEdgeWidth: 50,
+      drawerStyle: {
+        width: '50%',
+        backgroundColor: '#ffffff',
+      },
+      animation: 'slide',
+      drawerActiveTintColor: '#27ae60', // Green color for active tab
+      drawerInactiveTintColor: '#7f8c8d', // Gray color for inactive tabs
+      drawerLabelStyle: {
+        fontSize: 16,
+        fontWeight: 'bold',
+      },
+      drawerIcon: ({ focused, color, size }) => {
+        let iconName;
 
-  
+        switch (route.name) {
+          case 'home':
+            iconName = focused ? 'home' : 'home-outline';
+            break;
+          case 'cart':
+            iconName = focused ? 'cart' : 'cart-outline';
+            break;
+          case 'Orders':
+            iconName = focused ? 'clipboard' : 'clipboard-outline';
+            break;
+          case 'About':
+            iconName = focused ? 'information-circle' : 'information-circle-outline';
+            break;
+          case 'Contact':
+            iconName = focused ? 'call' : 'call-outline';
+            break;
+          case 'Terms':
+            iconName = focused ? 'document-text' : 'document-text-outline';
+            break;
+          default:
+            iconName = 'ellipse';
+        }
+
+        return <Ionicons name={iconName} size={size} color={color} />;
+      },
+    })}
+  >
+    <Drawer.Screen name="home" component={AppStack} />
+    {isCartEnabled && <Drawer.Screen name="cart" component={CartScreen} />}
+    <Drawer.Screen name="Orders" component={OrderHistoryScreen} />
+    <Drawer.Screen name="About" component={AboutScreen} />
+    <Drawer.Screen name="Contact" component={ContactUsScreen} />
+    <Drawer.Screen name="Terms" component={PolicyScreen} />
+  </Drawer.Navigator>
 );
+
 
 const App = () => {
   const [showWelcome, setShowWelcome] = useState(true);
@@ -145,7 +176,8 @@ const App = () => {
     <Provider store={store}>
       <NavigationContainer>
         <SafeAreaView style={styles.container}>
-           <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
+        <StatusBar style="dark" translucent={true} backgroundColor="transparent" />
+
           {showWelcome ? (
             <WelcomeScreen onReady={handleReady} />
           ) : (
