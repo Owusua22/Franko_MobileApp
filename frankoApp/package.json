@@ -48,7 +48,7 @@
     "react-native-skeleton-content": "^1.0.28",
     "react-native-skeleton-placeholder": "^5.2.4",
     "react-native-snap-carousel": "^3.9.1",
-    "react-native-svg": "^15.12.1",
+    "react-native-svg": "15.11.2",
     "react-native-swiper": "^1.6.0",
     "react-native-uuid": "^2.0.3",
     "react-native-web": "^0.20.0",
