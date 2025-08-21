@@ -31,7 +31,7 @@ const locations = [
       towns: [
         { name: "Tema", delivery_fee: 45 },
         { name: "Kasoa", delivery_fee: 45 },
-        { name: "Airpot", delivery_fee: 40 },
+        { name: "Airport", delivery_fee: 40 },
         { name: "Weija", delivery_fee: 40 },
         { name: "Ashaiman", delivery_fee: 45 },
         { name: "Dome", delivery_fee: 35 },
