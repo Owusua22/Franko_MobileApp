@@ -1,7 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { View, StyleSheet, FlatList, RefreshControl } from 'react-native';
 import CarouselComponent from '../components/CarouselComponent'; 
-import BannerComponent from '../components/BannerComponent';
 import ShopByBrandsBanner from '../components/BrandsBannerComponent';
 import ComboComponent from "../components/ComboComponent";
 import CategoryComponent from '../components/CategoryComponent';
@@ -11,13 +10,17 @@ import FridgeComponent from '../components/fridgeComponent';
 import TelevisionComponent from '../components/TelevisionComponent';
 import AppliancesComponent from '../components/AppliancesComponent';
 import SpeakerComponent from '../components/SpeakersComponent';
+import Deals from '../components/Deals';
 
 const HomeScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
 
   const sections = [
     { key: 'carousel', component: <CarouselComponent /> },
+ 
     { key: 'categorycomponent', component: <CategoryComponent /> },
+    { key: 'deals', component: <Deals /> },
+      
     {key:"phonecomponent", component:<PhonesComponent/>},
     {key:"laptopcomponent", component:<LaptopComponent/>},
     { key: 'fridgecomponent', component: <FridgeComponent/> },
@@ -26,7 +29,7 @@ const HomeScreen = () => {
     {key: "speakercomponent", component: <SpeakerComponent/>},
     
     { key: 'brandsbanner', component: <ShopByBrandsBanner /> },
-    { key: 'banner', component: <BannerComponent /> },
+ 
     { key: 'combocomponent', component: <ComboComponent /> },
 
   ];

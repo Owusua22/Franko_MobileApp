@@ -1,236 +1,616 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
-  TouchableOpacity,
   Image,
-  ScrollView,
+  TouchableOpacity,
+  FlatList,
   StyleSheet,
-  ActivityIndicator,
   Dimensions,
-} from "react-native";
-import { useDispatch, useSelector } from "react-redux";
-import { useNavigation } from "@react-navigation/native";
-import { fetchProductByShowroomAndRecord } from "../redux/slice/productSlice";
-import { fetchHomePageShowrooms } from "../redux/slice/showroomSlice";
-import Icon from "react-native-vector-icons/MaterialCommunityIcons"; 
-import frankoLogo from "../assets/frankoIcon.png"; 
+  ActivityIndicator,
+  Alert,
+} from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchProducts, resetProducts } from '../redux/slice/productSlice';
+import { addToCart } from '../redux/slice/cartSlice';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { AntDesign } from '@expo/vector-icons';
+import frankoLogo from '../assets/frankoIcon.png';
 
-const screenWidth = Dimensions.get("window").width;
+const { width } = Dimensions.get('window');
+const CARD_WIDTH = 170;
+const CARD_MARGIN = 8;
 
-const formatCurrency = (amount) => {
-  return new Intl.NumberFormat("en-GH", { style: "currency", currency: "GHS" }).format(amount);
+// Format price
+const formatPrice = (price) =>
+  new Intl.NumberFormat('en-GH', {
+    style: 'currency',
+    currency: 'GHS',
+  }).format(price || 0);
+
+// Format image URL
+const getValidImageUrl = (imagePath) => {
+  if (!imagePath) return 'https://via.placeholder.com/150';
+  return imagePath.includes('\\')
+    ? `https://smfteapi.salesmate.app/Media/Products_Images/${imagePath.split('\\').pop()}`
+    : imagePath;
 };
 
-const ComboComponent = () => {
-  const dispatch = useDispatch();
-  const navigation = useNavigation();
-  const { homePageShowrooms } = useSelector((state) => state.showrooms);
-  const { productsByShowroom, loading } = useSelector((state) => state.products);
+// Loading Card Component (matching Deals style)
+const LoadingCard = () => (
+  <View style={styles.loadingCard}>
+    <View style={styles.loadingImage}>
+      <Image source={frankoLogo} style={styles.frankoLogo} />
+    </View>
+    <View style={styles.loadingContent}>
+      <View style={styles.loadingTitle} />
+      <View style={styles.loadingPrice} />
+    </View>
+  </View>
+);
 
-  const [imageLoading, setImageLoading] = useState({});
-  const containerRefs = useRef({});
+// Product card component (matching Deals style)
+const ProductCard = ({ product, onPress, onAddToCart, isAddingToCart, index }) => {
+  const [imageLoading, setImageLoading] = useState(true);
+  const {
+    productID,
+    productName,
+    productImage,
+    price,
+    oldPrice,
+    stock,
+  } = product;
 
-  useEffect(() => {
-    dispatch(fetchHomePageShowrooms());
-  }, [dispatch]);
-
-  useEffect(() => {
-    if (homePageShowrooms?.length > 0) {
-      homePageShowrooms.forEach((showroom) => {
-        dispatch(fetchProductByShowroomAndRecord({ showRoomCode: showroom.showRoomID, recordNumber: 10 }));
-      });
-    }
-  }, [dispatch, homePageShowrooms]);
+  const imageUrl = getValidImageUrl(productImage);
+  const discount = oldPrice > 0 
+    ? Math.round(((oldPrice - price) / oldPrice) * 100)
+    : 0;
+  const isNew = index < 3; // First 3 products are marked as "NEW"
 
   return (
-    <View style={styles.container}>
-      {loading || homePageShowrooms?.length === 0 ? (
-        // Always show skeleton loader when loading or no showrooms exist
-        [...Array(3)].map((_, index) => (
-          <View key={index} style={styles.skeletonShowroom}>
-            <View style={styles.skeletonHeader} />
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.productList}>
-              {[...Array(6)].map((_, i) => (
-                <View key={i} style={styles.skeletonCard}>
-                  <Image source={frankoLogo} style={styles.frankoLogo} />
-                </View>
-              ))}
-            </ScrollView>
-          </View>
-        ))
-      ) : (
-        homePageShowrooms.map((showroom) => (
-          <View key={showroom.showRoomID} style={styles.showroomContainer}>
-            <View style={styles.showroomHeader}>
-              <Text style={styles.showroomTitle}>🔥 {showroom.showRoomName}</Text>
-              <TouchableOpacity onPress={() => navigation.navigate("showroom", { showRoomID: showroom.showRoomID })}>
-                <Text style={styles.viewMoreText}>
-                  View More <Icon name="arrow-right" size={16} color="#fff" />
-                </Text>
-              </TouchableOpacity>
+    <View style={styles.productCard}>
+      <TouchableOpacity
+        onPress={onPress}
+        activeOpacity={0.9}
+        style={styles.cardTouchable}
+      >
+        <View style={styles.imageContainer}>
+          {imageLoading && (
+            <View style={styles.imageLoadingContainer}>
+              <ActivityIndicator size="large" color="#16A34A" />
             </View>
+          )}
+          
+          <Image
+            source={{ uri: imageUrl }}
+            style={[styles.productImage, imageLoading && styles.hiddenImage]}
+            onLoad={() => setImageLoading(false)}
+            onError={() => setImageLoading(false)}
+          />
+          
+          {isNew && (
+            <View style={styles.newBadge}>
+              <Text style={styles.newBadgeText}>NEW</Text>
+            </View>
+          )}
+          
+          {discount > 0 && (
+            <View style={styles.discountBadge}>
+              <Text style={styles.discountText}>SALE</Text>
+            </View>
+          )}
 
-            <ScrollView
-              horizontal
-              ref={(el) => (containerRefs.current[showroom.showRoomID] = el)}
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.productList}
-            >
-              {loading ? (
-                [...Array(6)].map((_, index) => (
-                  <View key={index} style={styles.skeletonCard}>
-                    <Image source={frankoLogo} style={styles.frankoLogo} />
-                  </View>
-                ))
-              ) : productsByShowroom?.[showroom.showRoomID]?.length > 0 ? (
-                productsByShowroom[showroom.showRoomID].slice(0, 10).map((product) => (
-                  <TouchableOpacity
-                    key={product.productID}
-                    style={styles.productCard}
-                    onPress={() => navigation.navigate("ProductDetails", { productId: product.productID })}
-                  >
-                    {product.oldPrice > 0 && (
-                      <View style={styles.discountBadge}>
-                        <Text style={styles.discountText}>
-                          {`${Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100)}% OFF`}
-                        </Text>
-                      </View>
-                    )}
+          <TouchableOpacity style={styles.wishlistButton}>
+            <AntDesign name="hearto" size={14} color="#666" />
+          </TouchableOpacity>
 
-                    <View style={styles.imageContainer}>
-                      {imageLoading[product.productID] ? (
-                        <ActivityIndicator size="large" color="#ccc" />
-                      ) : (
-                        <Image
-                          source={{
-                            uri: `https://smfteapi.salesmate.app/Media/Products_Images/${product.productImage.split("\\").pop()}`,
-                          }}
-                          style={styles.productImage}
-                          onLoad={() => setImageLoading((prev) => ({ ...prev, [product.productID]: false }))}
-                          onError={() => setImageLoading((prev) => ({ ...prev, [product.productID]: true }))}
-                        />
-                      )}
-                    </View>
-
-                    <Text style={styles.productName} numberOfLines={1}>
-                      {product.productName}
-                    </Text>
-                    <Text style={styles.productPrice}>{formatCurrency(product.price)}</Text>
-                    {product.oldPrice > 0 && <Text style={styles.oldPrice}>{formatCurrency(product.oldPrice)}</Text>}
-                  </TouchableOpacity>
-                ))
-              ) : (
-                [...Array(6)].map((_, index) => (
-                  <View key={index} style={styles.skeletonCard}>
-                    <Image source={frankoLogo} style={styles.frankoLogo} />
-                  </View>
-                ))
-              )}
-            </ScrollView>
-          </View>
-        ))
-      )}
-
-      <TouchableOpacity style={styles.shopNowButton} onPress={() => navigation.navigate("Products")}>
-        <View style={styles.buttonContent}>
-          <Icon name="cart-outline" size={20} color="#fff" style={styles.icon} />
-          <Text style={styles.shopNowText}>Shop Now</Text>
+          {stock === 0 && (
+            <View style={styles.outOfStockOverlay}>
+              <Text style={styles.outOfStockText}>Out of Stock</Text>
+            </View>
+          )}
         </View>
+
+        <View style={styles.productInfo}>
+          <Text style={styles.productName} numberOfLines={2}>
+            {productName}
+          </Text>
+
+          <View style={styles.priceContainer}>
+            <Text style={styles.productPrice}>
+              {formatPrice(price)}
+            </Text>
+            {oldPrice > 0 && (
+              <Text style={styles.oldPrice}>
+                {formatPrice(oldPrice)}
+              </Text>
+            )}
+          </View>
+        </View>
+
+        <TouchableOpacity
+          style={[
+            styles.addToCartButton,
+            isAddingToCart && styles.addToCartButtonDisabled,
+          ]}
+          onPress={(e) => {
+            e.stopPropagation();
+            onAddToCart(product);
+          }}
+          disabled={isAddingToCart}
+        >
+          {isAddingToCart ? (
+            <ActivityIndicator size={14} color="white" />
+          ) : (
+            <AntDesign name="shoppingcart" size={14} color="white" />
+          )}
+        </TouchableOpacity>
       </TouchableOpacity>
     </View>
   );
 };
 
-export default ComboComponent;
+const ComboComponent = () => {
+  const dispatch = useDispatch();
+  const navigation = useNavigation();
+  const { products, loading } = useSelector((state) => state.products);
+  const cartId = useSelector((state) => state.cart.cartId);
+  
+  const [recentProducts, setRecentProducts] = useState([]);
+  const [addingToCart, setAddingToCart] = useState({});
+
+  // Reset products and fetch fresh data when component is focused
+  useFocusEffect(
+    React.useCallback(() => {
+      dispatch(resetProducts());
+      dispatch(fetchProducts());
+    }, [dispatch])
+  );
+
+  // Process products when they change
+  useEffect(() => {
+    if (products && products.length > 0) {
+      // Sort products by creation date (most recent first) and take first 10
+      const sortedProducts = products
+        .slice()
+        .sort((a, b) => {
+          const dateA = new Date(a.dateCreated || a.createdAt || a.created_at || a.date_created || a.creationDate || 0);
+          const dateB = new Date(b.dateCreated || b.createdAt || b.created_at || b.date_created || b.creationDate || 0);
+          
+          return dateB - dateA; // Descending order (newest first)
+        })
+        .slice(0, 10);
+      
+      setRecentProducts(sortedProducts);
+    } else {
+      setRecentProducts([]);
+    }
+  }, [products]);
+
+  const handleAddToCart = (product) => {
+    const cartData = {
+      cartId,
+      productId: product.productID,
+      price: product.price,
+      quantity: 1,
+    };
+
+    setAddingToCart((prev) => ({ ...prev, [product.productID]: true }));
+
+    dispatch(addToCart(cartData))
+      .then(() => {
+        Alert.alert("Success", `${product.productName} added to cart successfully!`);
+      })
+      .catch((error) => {
+        Alert.alert("Error", `Failed to add product to cart: ${error.message}`);
+      })
+      .finally(() => {
+        setAddingToCart((prev) => {
+          const newState = { ...prev };
+          delete newState[product.productID];
+          return newState;
+        });
+      });
+  };
+
+  const handleProductPress = (productID) => {
+    navigation.navigate('ProductDetails', { productID });
+  };
+
+  const handleViewAllPress = () => {
+    navigation.navigate('Products');
+  };
+
+  const renderProduct = ({ item, index }) => (
+    <ProductCard 
+      product={item} 
+      index={index}
+      onPress={() => handleProductPress(item.productID)} 
+      onAddToCart={handleAddToCart}
+      isAddingToCart={addingToCart[item.productID]}
+    />
+  );
+
+  const renderSkeletonItem = ({ item, index }) => (
+    <LoadingCard key={index} />
+  );
+
+  const skeletonData = Array.from({ length: 10 }, (_, index) => ({ id: index }));
+
+  // Show skeleton while loading and no products available
+  if (loading && recentProducts.length === 0) {
+    return (
+      <View style={styles.container}>
+        {/* Header */}
+        <View style={styles.header}>
+          <View style={styles.titleContainer}>
+            <Text style={styles.title}>New Arrivals</Text>
+            <View style={styles.titleUnderline} />
+            <Text style={styles.subtitle}>Fresh picks just for you</Text>
+          </View>
+          
+          <TouchableOpacity
+            style={styles.viewAllButton}
+            onPress={handleViewAllPress}
+          >
+            <Text style={styles.viewAllText}>Shop All</Text>
+            <View style={styles.arrowContainer}>
+              <Text style={styles.arrow}>→</Text>
+            </View>
+          </TouchableOpacity>
+        </View>
+
+        {/* Skeleton Loading with FlatList structure */}
+        <FlatList
+          data={skeletonData}
+          renderItem={renderSkeletonItem}
+          keyExtractor={(item) => item.id.toString()}
+          numColumns={2}
+          columnWrapperStyle={styles.row}
+          contentContainerStyle={styles.flatListContent}
+          showsVerticalScrollIndicator={false}
+          scrollEnabled={false}
+        />
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <View style={styles.titleContainer}>
+          <Text style={styles.title}>New Arrivals</Text>
+          <View style={styles.titleUnderline} />
+          <Text style={styles.subtitle}>Fresh picks just for you</Text>
+        </View>
+        
+        <TouchableOpacity
+          style={styles.viewAllButton}
+          onPress={handleViewAllPress}
+        >
+          <Text style={styles.viewAllText}>Shop All</Text>
+          <View style={styles.arrowContainer}>
+            <Text style={styles.arrow}>→</Text>
+          </View>
+        </TouchableOpacity>
+      </View>
+
+      {/* Products Grid */}
+      <FlatList
+        data={recentProducts}
+        renderItem={renderProduct}
+        keyExtractor={(item) => item.productID?.toString() || Math.random().toString()}
+        numColumns={2}
+        columnWrapperStyle={styles.row}
+        contentContainerStyle={styles.flatListContent}
+        showsVerticalScrollIndicator={false}
+        scrollEnabled={false} // Disable scrolling if this is part of a larger scroll view
+      />
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
-  container: { padding: 10, backgroundColor: "#fff", marginBottom: 80 },
-  showroomContainer: { marginBottom: 5 },
-  showroomHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    backgroundColor: "#16A34A",
-    padding: 12,
-    borderRadius: 8,
-    alignItems: "center",
+  container: {
+    paddingHorizontal: 10,
+    paddingVertical: 16,
+    backgroundColor: "#F8FAFC",
+    marginBottom: 80,
   },
-  showroomTitle: { color: "#fff", fontWeight: "bold", fontSize: 13 },
-  viewMoreText: { color: "#fff", fontSize: 12, fontWeight: "500" },
-  productList: { flexDirection: "row", marginTop: 10 },
+  // Enhanced Header Styles
+  header: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    marginBottom: 24,
+  },
+  titleContainer: {
+    alignItems: 'flex-start',
+    flex: 1,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: '800',
+    color: '#111827',
+    marginBottom: 6,
+    letterSpacing: -0.5,
+  },
+  titleUnderline: {
+    width: 80,
+    height: 4,
+    backgroundColor: '#16A34A',
+    borderRadius: 2,
+    marginBottom: 4,
+  },
+  subtitle: {
+    fontSize: 14,
+    color: '#6B7280',
+    fontWeight: '500',
+  },
+  viewAllButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#16A34A',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#f0fdf4',
+  },
+  viewAllText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#fff',
+    marginRight: 6,
+  },
+  arrowContainer: {
+    backgroundColor: '#EF4444',
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  arrow: {
+    fontSize: 12,
+    color: '#ffffff',
+    fontWeight: 'bold',
+  },
+  
+  flatListContent: {
+    paddingBottom: 20
+  },
+  row: {
+    justifyContent: 'space-between',
+  },
+
+  // Product Card Styles (matching Deals component exactly)
   productCard: {
     backgroundColor: "#fff",
-    padding: 10,
+    padding: 6,
     borderRadius: 12,
-    width: 150,
-    marginRight: 8,
+    width: CARD_WIDTH,
+    marginRight: CARD_MARGIN,
     marginLeft: 10,
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.8,
+    shadowOpacity: 0.9,
     shadowRadius: 2,
     elevation: 5,
-    marginBottom: 10,
+    marginBottom: 20,
+    height: 240,
   },
-  imageContainer: { height: 120, justifyContent: "center", alignItems: "center" },
-  productImage: { width: "100%", height: "100%", resizeMode: "contain", borderRadius: 8 },
-  productName: { fontWeight: "bold", fontSize: 12, marginTop: 6, color: "#333" },
-  productPrice: { color: "#E63946", fontSize: 12, fontWeight: "bold", marginTop: 4 },
-  oldPrice: { textDecorationLine: "line-through", color: "gray", fontSize: 10 },
-  discountBadge: {
+  
+  cardTouchable: {
+    flex: 1,
+  },
+  
+  imageContainer: {
+    position: "relative",
+    height: 140,
+  },
+  
+  imageLoadingContainer: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#f8f9fa",
+    zIndex: 2,
+  },
+  
+  productImage: {
+    width: "100%",
+    height: "100%",
+    resizeMode: "contain",
+  },
+  
+  hiddenImage: {
+    opacity: 0,
+  },
+  
+  newBadge: {
     position: "absolute",
     top: 8,
     left: 8,
-    backgroundColor: "#E63946",
+    backgroundColor: "#ff4757",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    zIndex: 2,
+  },
+  
+  newBadgeText: {
+    color: "white",
+    fontSize: 10,
+    fontWeight: "bold",
+    textTransform: "uppercase",
+  },
+  
+  discountBadge: {
+    position: "absolute",
+    top: 8,
+    right: 8,
+    backgroundColor: "#ff4757",
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 8,
+    zIndex: 2,
+  },
+  
+  discountText: {
+    color: "white",
+    fontSize: 10,
+    fontWeight: "bold",
+    textTransform: "uppercase",
+  },
+  
+  wishlistButton: {
+    position: "absolute",
+    bottom: 8,
+    right: 8,
+    backgroundColor: "white",
     padding: 6,
-    borderRadius: 5,
-    zIndex: 1,
+    borderRadius: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 4,
   },
-  discountText: { color: "#fff", fontSize: 11, fontWeight: "bold" },
-  shopNowButton: {
-    backgroundColor: "#E63946",
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 15,
-    alignItems: "center",
-    justifyContent: "center",
-    flexDirection: "row",
-    marginBottom: 10,
+  
+  outOfStockOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 3,
   },
-  buttonContent: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  icon: {
-    marginRight: 8,
-  },
-  shopNowText: {
-    color: "#fff",
+  
+  outOfStockText: {
+    color: '#ffffff',
     fontSize: 14,
+    fontWeight: 'bold',
+  },
+  
+  productInfo: {
+    padding: 12,
+    paddingBottom: 8,
+  },
+  
+  productName: {
+    fontSize: 13,
+    color: "#333",
+    fontWeight: "500",
+    lineHeight: 18,
+    marginBottom: 6,
+    minHeight: 36,
+  },
+  
+  priceContainer: {
+    flexDirection: "column",
+    gap: 2,
+    marginBottom: 8,
+  },
+  
+  productPrice: {
+    fontSize: 14,
+    color: "#2d3436",
     fontWeight: "bold",
   },
-  skeletonShowroom: { marginBottom: 10 },
-  skeletonHeader: { height: 30, backgroundColor: "#f0f0f0", borderRadius: 8, marginBottom: 8 },
-  skeletonCard: {
-    backgroundColor: "#f0f0f0",
-    padding: 10,
+  
+  oldPrice: {
+    fontSize: 10,
+    color: "#636e72",
+    textDecorationLine: "line-through",
+  },
+  
+  addToCartButton: {
+    position: "absolute",
+    bottom: 2,
+    right: 8,
+    backgroundColor: "#16A34A",
+    padding: 8,
+    borderRadius: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  
+  addToCartButtonDisabled: {
+    backgroundColor: "#7dd3c0",
+  },
+  
+  // Loading Card Styles (matching product card exactly)
+  skeletonContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  
+  loadingCard: {
+    width: CARD_WIDTH,
+    marginRight: CARD_MARGIN,
+    backgroundColor: "#fff",
     borderRadius: 12,
-    width: 150,
-    height: 140,
-    marginRight: 8,
+    overflow: "hidden",
+    height: 240,
+    marginBottom: 20,
     marginLeft: 10,
-    marginBottom: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.9,
+    shadowRadius: 2,
+    elevation: 5,
+  },
+  
+  loadingImage: {
+    height: 140,
+    backgroundColor: "#f0f0f0",
     justifyContent: "center",
     alignItems: "center",
     position: "relative",
     overflow: "hidden",
   },
   
-  frankoLogo: {
-    width: 50, // Increase size
-    height: 50,
-    resizeMode: "contain",
-    position: "absolute",
-    opacity: 0.15, // Reduce opacity to make it a watermark
+  loadingContent: {
+    padding: 12,
   },
   
+  loadingTitle: {
+    height: 16,
+    backgroundColor: "#f0f0f0",
+    borderRadius: 4,
+    marginBottom: 8,
+    position: "relative",
+    overflow: "hidden",
+  },
+  
+  loadingPrice: {
+    height: 12,
+    width: "60%",
+    backgroundColor: "#f0f0f0",
+    borderRadius: 4,
+    position: "relative",
+    overflow: "hidden",
+  },
+  
+  frankoLogo: {
+    width: 60,
+    height: 60,
+    resizeMode: "contain",
+    opacity: 0.1,
+    tintColor: "#bbb",
+  },
 });
+
+export default ComboComponent;

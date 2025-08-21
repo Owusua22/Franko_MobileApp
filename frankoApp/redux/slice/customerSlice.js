@@ -85,7 +85,6 @@ export const updateAccountStatus = createAsyncThunk(
         accountStatus: "0",
       });
 
-      console.log("Response from server:", response.data);
 
       // Remove customer from AsyncStorage
       await AsyncStorage.removeItem("customer");

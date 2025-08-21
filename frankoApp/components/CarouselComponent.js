@@ -54,7 +54,7 @@ const styles = StyleSheet.create({
     width: "100%",
     alignItems: "center",
     justifyContent: "center",
-    height: 150,
+    height: 180,
   },
   slide: {
     width: "100%", 
@@ -63,7 +63,7 @@ const styles = StyleSheet.create({
   },
   image: {
     width: "100%", // Match BannerComponent width
-    height: 150, // Match BannerComponent height
+    height: 180, // Match BannerComponent height
     resizeMode: "cover",
   },
   noAdsText: {
@@ -78,14 +78,14 @@ const styles = StyleSheet.create({
     height: 8,
     borderRadius: 4,
     margin: 3,
-    marginTop: 85
+    marginTop: 105
   },
   activeDot: {
-    backgroundColor: "#007AFF",
+    backgroundColor: "#10B981",
     width: 10,
     height: 10,
     borderRadius: 5,
-    marginTop: 85
+    marginTop: 105
   },
 });
 

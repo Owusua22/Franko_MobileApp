@@ -77,11 +77,13 @@ export const checkOutOrder = createAsyncThunk(
   }
 );
 
-export const getSalesOrder = createAsyncThunk(
-  "orders/getSalesOrder",
-  async (OrderId, { rejectWithValue }) => {
+export const fetchSalesOrderById = createAsyncThunk(
+  "orders/fetchSalesOrderById",
+  async (orderId, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/Order/SalesOrderGet/${OrderId}`);
+      const response = await axios.get(
+        `${API_BASE_URL}/Order/SalesOrderGet/${orderId}`
+      );
       return response.data;
     } catch (error) {
       return rejectWithValue(
@@ -291,16 +293,17 @@ const orderSlice = createSlice({
         state.error = action.payload;
       })
       // Get sales order
-      .addCase(getSalesOrder.pending, (state) => {
+     .addCase(fetchSalesOrderById.pending, (state) => {
         state.loading = true;
+        state.error = null;
       })
-      .addCase(getSalesOrder.fulfilled, (state, action) => {
+      .addCase(fetchSalesOrderById.fulfilled, (state, action) => {
         state.loading = false;
-        state.orderDetails = action.payload;
+        state.salesOrder = action.payload;
       })
-      .addCase(getSalesOrder.rejected, (state, action) => {
+      .addCase(fetchSalesOrderById.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
+        state.error = action.payload || 'Failed to fetch sales order';
       })
       // Create order address
       .addCase(createOrderAddress.pending, (state) => {

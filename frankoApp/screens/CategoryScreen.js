@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -7,7 +7,6 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   ScrollView,
-  Image,
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchCategories } from '../redux/slice/categorySlice';
@@ -44,7 +43,7 @@ const CategoryScreen = () => {
   if (status === 'loading') {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#007BFF" />
+        <ActivityIndicator size="large" color="#22C55E" />
         <Text style={styles.loadingText}>Loading categories...</Text>
       </View>
     );
@@ -61,18 +60,27 @@ const CategoryScreen = () => {
   const renderBrands = () => {
     const filteredBrands = brands.filter((brand) => brand.categoryId === selectedCategoryId);
     if (filteredBrands.length === 0) {
-      return <Text style={styles.noBrandsText}>No brands available.</Text>;
+      return (
+        <View style={styles.noBrandsContainer}>
+          <Text style={styles.noBrandsText}>No brands available</Text>
+          <Text style={styles.noBrandsSubtext}>Try selecting a different category</Text>
+        </View>
+      );
     }
     return (
-      <ScrollView style={styles.brandsContainer}>
+      <ScrollView style={styles.brandsContainer} showsVerticalScrollIndicator={false}>
         <View style={styles.brandGrid}>
           {filteredBrands.map((item) => (
             <TouchableOpacity
               key={item.brandId}
               style={styles.brandCard}
               onPress={() => navigation.navigate('Brands', { brandId: item.brandId })}
+              activeOpacity={0.8}
             >
+          
+          
               <Text style={styles.brandName}>{item.brandName}</Text>
+             
             </TouchableOpacity>
           ))}
         </View>
@@ -83,41 +91,61 @@ const CategoryScreen = () => {
   return (
     <View style={styles.screen}>
       <View style={styles.categoryContainer}>
-      <FlatList
-  data={categories.filter((item) => item.categoryName !== 'Products out of stock')}
-  keyExtractor={(item) => item.categoryId}
-  renderItem={({ item }) => (
-    <TouchableOpacity
-      style={[
-        styles.categoryItem,
-        selectedCategoryId === item.categoryId && styles.activeCategory,
-      ]}
-      onPress={() => {
-        setSelectedCategoryId(item.categoryId);
-        setSelectedCategoryName(item.categoryName);
-      }}
-    >
-      <Text
-        style={[
-          styles.categoryText,
-          selectedCategoryId === item.categoryId && styles.activeCategoryText,
-        ]}
-      >
-        {item.categoryName}
-      </Text>
-    </TouchableOpacity>
-  )}
-/>
-
+        <View style={styles.categoryHeader}>
+          <Text style={styles.categoryHeaderText}>Categories</Text>
+        </View>
+        <FlatList
+          data={categories.filter((item) => item.categoryName !== 'Products out of stock')}
+          keyExtractor={(item) => item.categoryId}
+          showsVerticalScrollIndicator={false}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              style={[
+                styles.categoryItem,
+                selectedCategoryId === item.categoryId && styles.activeCategory,
+              ]}
+              onPress={() => {
+                setSelectedCategoryId(item.categoryId);
+                setSelectedCategoryName(item.categoryName);
+              }}
+              activeOpacity={0.8}
+            >
+              <View style={styles.categoryItemContent}>
+                <View style={[
+                  styles.categoryIndicator,
+                  selectedCategoryId === item.categoryId && styles.activeCategoryIndicator,
+                ]} />
+                <Text
+                  style={[
+                    styles.categoryText,
+                    selectedCategoryId === item.categoryId && styles.activeCategoryText,
+                  ]}
+                >
+                  {item.categoryName}
+                </Text>
+              </View>
+            </TouchableOpacity>
+          )}
+        />
       </View>
+      
       <View style={styles.brandContainer}>
         {selectedCategoryId ? (
           <>
-            <Text style={styles.categoryTitle}>{selectedCategoryName}</Text>
+            <View style={styles.brandHeader}>
+              <Text style={styles.categoryTitle}>{selectedCategoryName}</Text>
+              <Text style={styles.categorySubtitle}>Explore brands in this category</Text>
+            </View>
             {renderBrands()}
           </>
         ) : (
-          <Text style={styles.selectPrompt}>Select a category to view brands</Text>
+          <View style={styles.emptyStateContainer}>
+            <View style={styles.emptyStateIcon}>
+              <Text style={styles.emptyStateEmoji}>📂</Text>
+            </View>
+            <Text style={styles.selectPrompt}>Select a category to view brands</Text>
+            <Text style={styles.selectSubPrompt}>Choose from the categories on the left</Text>
+          </View>
         )}
       </View>
     </View>
@@ -128,90 +156,217 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     flexDirection: 'row',
-    backgroundColor: '#F8F9FA',
+
     marginBottom: 80
   },
   categoryContainer: {
-    flex: 1,
-    backgroundColor: '#E9ECEF',
-    paddingVertical: 10,
+    flex: 1.5,
+    backgroundColor: '#DCFCE7',
+
+    shadowColor: '#16A34A',
+    shadowOffset: { width: 2, height: 0 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  categoryHeader: {
+    padding: 10,
+    paddingBottom: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#BBF7D0',
+  },
+  categoryHeaderText: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#15803D',
+    textAlign: 'center',
   },
   brandContainer: {
     flex: 2,
-    padding: 10,
+    padding: 20,
     backgroundColor: '#FFFFFF',
   },
   categoryItem: {
-    padding: 12,
-    marginVertical: 6,
-    marginHorizontal: 10,
-    backgroundColor: '#F8F9FA',
-    borderRadius: 8,
-    alignItems: 'center',
+    marginVertical: 4,
+    marginHorizontal: 2,
+    borderRadius: 12,
+    overflow: 'hidden',
   },
   activeCategory: {
-    backgroundColor: '#D72638',
+    backgroundColor: '#22C55E',
+    shadowColor: '#16A34A',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  categoryItemContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+  },
+  categoryIndicator: {
+    width: 4,
+    height: 20,
+    backgroundColor: '#BBF7D0',
+    borderRadius: 2,
+    marginRight: 12,
+  },
+  activeCategoryIndicator: {
+    backgroundColor: '#FFFFFF',
   },
   categoryText: {
     fontSize: 14,
-    color: '#333',
+    fontWeight: '500',
+    color: '#166534',
+    flex: 1,
   },
   activeCategoryText: {
     color: '#FFFFFF',
+    fontWeight: '600',
+  },
+  brandHeader: {
+    marginBottom: 20,
+    paddingBottom: 15,
+    borderBottomWidth: 2,
+    borderBottomColor: '#F0FDF4',
   },
   categoryTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    color: '#D72638',
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#15803D',
+    marginBottom: 4,
+  },
+  categorySubtitle: {
+    fontSize: 12,
+    
+    fontWeight: '500',
   },
   centered: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#F0FDF4',
   },
   loadingText: {
-    marginTop: 10,
-    fontSize: 14,
-    color: '#555',
+    marginTop: 12,
+    fontSize: 16,
+    color: '#16A34A',
+    fontWeight: '500',
   },
   errorText: {
-    fontSize: 14,
-    color: 'red',
+    fontSize: 16,
+    color: '#DC2626',
+    textAlign: 'center',
+    fontWeight: '500',
+  },
+  emptyStateContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyStateIcon: {
+    width: 80,
+    height: 80,
+    backgroundColor: '#F0FDF4',
+    borderRadius: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 20,
+    borderWidth: 2,
+    borderColor: '#BBF7D0',
+  },
+  emptyStateEmoji: {
+    fontSize: 32,
   },
   selectPrompt: {
-    fontSize: 14,
-    color: '#888',
+    fontSize: 18,
+    color: '#16A34A',
     textAlign: 'center',
-    marginTop: 20,
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+  selectSubPrompt: {
+    fontSize: 14,
+    color: '#22C55E',
+    textAlign: 'center',
   },
   brandsContainer: {
-    marginTop: 10,
+    flex: 1,
   },
   brandGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
+    paddingBottom: 20,
   },
   brandCard: {
     width: '48%',
-    padding: 12,
-    marginVertical: 8,
-    backgroundColor: '#D1ECF1',
-    borderRadius: 8,
+    backgroundColor: '#F0FDF4',
+    borderRadius: 16,
+    padding: 10,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#BBF7D0',
+    shadowColor: '#16A34A',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
+    position: 'relative',
+  },
+  brandIconContainer: {
+    width: 40,
+    height: 40,
+    backgroundColor: '#DCFCE7',
+    borderRadius: 20,
+    justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 15,
+    marginBottom: 12,
+    alignSelf: 'center',
+  },
+  brandIcon: {
+    fontSize: 20,
   },
   brandName: {
-    fontSize: 14,
-    color: '#0C5460',
+    fontSize: 13,
+    color: '#15803D',
     textAlign: 'center',
+    fontWeight: '600',
+    lineHeight: 20,
+  },
+  brandArrow: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    width: 24,
+    height: 24,
+    backgroundColor: '#22C55E',
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  arrowText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+  noBrandsContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 40,
   },
   noBrandsText: {
+    fontSize: 18,
+    color: '#16A34A',
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+  noBrandsSubtext: {
     fontSize: 14,
-    color: '#888',
+    color: '#22C55E',
     textAlign: 'center',
   },
 });
-
 export default CategoryScreen;
