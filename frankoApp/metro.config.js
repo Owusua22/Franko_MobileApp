@@ -1,7 +1,9 @@
-// Learn more https://docs.expo.io/guides/customizing-metro
+// metro.config.js
 const { getDefaultConfig } = require('expo/metro-config');
 
-/** @type {import('expo/metro-config').MetroConfig} */
 const config = getDefaultConfig(__dirname);
+
+// Add expo-asset plugin for hashing assets
+config.transformer.assetPlugins = ['expo-asset/tools/hashAssetFiles'];
 
 module.exports = config;

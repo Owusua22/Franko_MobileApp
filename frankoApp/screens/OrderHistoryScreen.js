@@ -326,7 +326,7 @@ const OrderHistoryScreen = () => {
       </Text>
       <TouchableOpacity 
         style={styles.startShoppingButton} 
-        onPress={() => navigation.navigate("home", { screen: "ProductScreen" })}
+        onPress={() => navigation.navigate("Home", { screen: "Products" })}
         activeOpacity={0.9}
       >
         <View style={styles.startShoppingContent}>
