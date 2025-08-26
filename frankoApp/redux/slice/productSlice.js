@@ -115,7 +115,7 @@ export const fetchProductByShowroomAndRecord = createAsyncThunk(
 
       return { showRoomCode, products: sortedProducts }; // Return sorted data
     } catch (error) {
-      console.error("Error fetching product by showroom and record number:", error);
+     
       throw error;
     }
   }

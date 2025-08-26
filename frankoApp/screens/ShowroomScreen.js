@@ -20,6 +20,7 @@ import { addToCart } from "../redux/slice/cartSlice";
 import { useNavigation, useRoute, useFocusEffect } from "@react-navigation/native";
 import { AntDesign } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { removeFromWishlist, addToWishlist } from "../redux/wishlistSlice";
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -28,6 +29,8 @@ const ShowroomScreen = () => {
   const navigation = useNavigation();
   const route = useRoute(); 
   const { showRoomID, showRoomName, showRoomLogo } = route.params || {};
+  const wishlistItems = useSelector((state) => state.wishlist.items);
+
 
   const { productsByShowroom = {}, loading: productsLoading } = useSelector(
     (state) => state.products
@@ -97,6 +100,20 @@ const ShowroomScreen = () => {
       }, 300);
     }
   }, [filteredProducts, shouldRestoreScroll]);
+  const handleToggleWishlist = (product) => {
+  const isInWishlist = wishlistItems.some(
+    (w) => w.productID === product.productID
+  );
+
+  if (isInWishlist) {
+    dispatch(removeFromWishlist(product.productID));
+    Alert.alert("Removed", `${product.productName} removed from wishlist.`);
+  } else {
+    dispatch(addToWishlist(product));
+    Alert.alert("Added", `${product.productName} added to wishlist ❤️`);
+  }
+};
+
 
   // Add import for fetchShowrooms
   const restoreScrollPosition = async () => {
@@ -329,9 +346,28 @@ const ShowroomScreen = () => {
             </View>
           )}
 
-          <TouchableOpacity style={styles.wishlistButton}>
-            <AntDesign name="hearto" size={16} color="#666" />
-          </TouchableOpacity>
+          <TouchableOpacity
+  style={styles.wishlistButton}
+  onPress={(e) => {
+    e.stopPropagation(); // prevent card navigation
+    handleToggleWishlist(item);
+  }}
+>
+  <AntDesign
+    name={
+      wishlistItems.some((w) => w.productID === item.productID)
+        ? "heart"
+        : "hearto"
+    }
+    size={16}
+    color={
+      wishlistItems.some((w) => w.productID === item.productID)
+        ? "red"
+        : "#666"
+    }
+  />
+</TouchableOpacity>
+
         </View>
 
         <View style={styles.productInfo}>

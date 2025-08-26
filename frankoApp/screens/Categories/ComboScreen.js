@@ -19,7 +19,7 @@ import { addToCart } from "../../redux/slice/cartSlice"; // Import addToCart act
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { AntDesign } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
+import { removeFromWishlist, addToWishlist } from "../../redux/wishlistSlice";
 const screenWidth = Dimensions.get("window").width;
 
 const ComboScreen = () => {
@@ -29,6 +29,7 @@ const ComboScreen = () => {
     (state) => state.products
   );
   const cartId = useSelector((state) => state.cart.cartId); // Get cartId from Redux
+  const wishlistItems = useSelector((state) => state.wishlist.items);
 
   const hardcodedCategoryId = "4bdb194e-b308-4fd2-981d-e2c94736c773" 
 
@@ -198,6 +199,20 @@ const ComboScreen = () => {
         });
       });
   };
+  const handleToggleWishlist = (product) => {
+  const isInWishlist = wishlistItems.some(
+    (w) => w.productID === product.productID
+  );
+
+  if (isInWishlist) {
+    dispatch(removeFromWishlist(product.productID));
+    Alert.alert("Removed", `${product.productName} removed from wishlist.`);
+  } else {
+    dispatch(addToWishlist(product));
+    Alert.alert("Added", `${product.productName} added to wishlist ❤️`);
+  }
+};
+
 
   // Handle product press with scroll position saving
   const handleProductPress = async (productId) => {
@@ -300,9 +315,28 @@ const ComboScreen = () => {
             </View>
           )}
 
-          <TouchableOpacity style={styles.wishlistButton}>
-            <AntDesign name="hearto" size={16} color="#666" />
-          </TouchableOpacity>
+         <TouchableOpacity
+  style={styles.wishlistButton}
+  onPress={(e) => {
+    e.stopPropagation(); // Prevent navigation
+    handleToggleWishlist(item);
+  }}
+>
+  <AntDesign
+    name={
+      wishlistItems.some((w) => w.productID === item.productID)
+        ? "heart"
+        : "hearto"
+    }
+    size={16}
+    color={
+      wishlistItems.some((w) => w.productID === item.productID)
+        ? "red"
+        : "#666"
+    }
+  />
+</TouchableOpacity>
+
         </View>
 
         <View style={styles.productInfo}>

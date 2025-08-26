@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, memo } from 'react';
 import {
   View,
   Text,
@@ -13,59 +13,31 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchProducts, resetProducts } from '../redux/slice/productSlice';
 import { addToCart } from '../redux/slice/cartSlice';
+import { addToWishlist } from "../redux/wishlistSlice"; // ✅ FIX: import
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { AntDesign } from '@expo/vector-icons';
-import frankoLogo from '../assets/frankoIcon.png';
+
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = 170;
 const CARD_MARGIN = 8;
 
-// Format price
-const formatPrice = (price) =>
+// ✅ FIX: correct function name
+const formatCurrency = (price) =>
   new Intl.NumberFormat('en-GH', {
     style: 'currency',
     currency: 'GHS',
   }).format(price || 0);
 
-// Format image URL
-const getValidImageUrl = (imagePath) => {
-  if (!imagePath) return 'https://via.placeholder.com/150';
-  return imagePath.includes('\\')
-    ? `https://smfteapi.salesmate.app/Media/Products_Images/${imagePath.split('\\').pop()}`
-    : imagePath;
-};
-
-// Loading Card Component (matching Deals style)
-const LoadingCard = () => (
-  <View style={styles.loadingCard}>
-    <View style={styles.loadingImage}>
-      <Image source={frankoLogo} style={styles.frankoLogo} />
-    </View>
-    <View style={styles.loadingContent}>
-      <View style={styles.loadingTitle} />
-      <View style={styles.loadingPrice} />
-    </View>
-  </View>
-);
-
-// Product card component (matching Deals style)
-const ProductCard = ({ product, onPress, onAddToCart, isAddingToCart, index }) => {
+// ✅ Memoized Product Card (prevents unnecessary re-renders)
+const ProductCard = memo(({ product, index, onPress, onAddToCart, isAddingToCart, isInWishlist, onToggleWishlist }) => {
   const [imageLoading, setImageLoading] = useState(true);
-  const {
-    productID,
-    productName,
-    productImage,
-    price,
-    oldPrice,
-    stock,
-  } = product;
 
-  const imageUrl = getValidImageUrl(productImage);
-  const discount = oldPrice > 0 
-    ? Math.round(((oldPrice - price) / oldPrice) * 100)
+  const discount = product.oldPrice > 0 
+    ? Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100)
     : 0;
-  const isNew = index < 3; // First 3 products are marked as "NEW"
+
+  const isNew = index < 3;
 
   return (
     <View style={styles.productCard}>
@@ -77,52 +49,53 @@ const ProductCard = ({ product, onPress, onAddToCart, isAddingToCart, index }) =
         <View style={styles.imageContainer}>
           {imageLoading && (
             <View style={styles.imageLoadingContainer}>
-              <ActivityIndicator size="large" color="#16A34A" />
+              <ActivityIndicator size="large" color="#E63946" />
             </View>
           )}
           
           <Image
-            source={{ uri: imageUrl }}
+            source={{
+              uri: `https://smfteapi.salesmate.app/Media/Products_Images/${product.productImage?.split("\\").pop()}`,
+            }}
             style={[styles.productImage, imageLoading && styles.hiddenImage]}
             onLoad={() => setImageLoading(false)}
             onError={() => setImageLoading(false)}
           />
-          
+
           {isNew && (
             <View style={styles.newBadge}>
               <Text style={styles.newBadgeText}>NEW</Text>
             </View>
           )}
-          
+
           {discount > 0 && (
             <View style={styles.discountBadge}>
               <Text style={styles.discountText}>SALE</Text>
             </View>
           )}
 
-          <TouchableOpacity style={styles.wishlistButton}>
-            <AntDesign name="hearto" size={14} color="#666" />
+          {/* Wishlist Button */}
+          <TouchableOpacity style={styles.wishlistButton} onPress={() => onToggleWishlist(product, isInWishlist)}>
+            <AntDesign
+              name={isInWishlist ? "heart" : "hearto"}
+              size={18}
+              color={isInWishlist ? "red" : "#666"}
+            />
           </TouchableOpacity>
-
-          {stock === 0 && (
-            <View style={styles.outOfStockOverlay}>
-              <Text style={styles.outOfStockText}>Out of Stock</Text>
-            </View>
-          )}
         </View>
 
         <View style={styles.productInfo}>
           <Text style={styles.productName} numberOfLines={2}>
-            {productName}
+            {product.productName}
           </Text>
 
           <View style={styles.priceContainer}>
             <Text style={styles.productPrice}>
-              {formatPrice(price)}
+              {formatCurrency(product.price)}
             </Text>
-            {oldPrice > 0 && (
+            {product.oldPrice > 0 && (
               <Text style={styles.oldPrice}>
-                {formatPrice(oldPrice)}
+                {formatCurrency(product.oldPrice)}
               </Text>
             )}
           </View>
@@ -148,18 +121,19 @@ const ProductCard = ({ product, onPress, onAddToCart, isAddingToCart, index }) =
       </TouchableOpacity>
     </View>
   );
-};
+});
 
 const ComboComponent = () => {
   const dispatch = useDispatch();
   const navigation = useNavigation();
   const { products, loading } = useSelector((state) => state.products);
   const cartId = useSelector((state) => state.cart.cartId);
-  
+  const wishlistItems = useSelector((state) => state.wishlist.items);
+
   const [recentProducts, setRecentProducts] = useState([]);
   const [addingToCart, setAddingToCart] = useState({});
 
-  // Reset products and fetch fresh data when component is focused
+  // Reset products + fetch fresh
   useFocusEffect(
     React.useCallback(() => {
       dispatch(resetProducts());
@@ -167,27 +141,21 @@ const ComboComponent = () => {
     }, [dispatch])
   );
 
-  // Process products when they change
+  // Sort + take 10 newest
   useEffect(() => {
-    if (products && products.length > 0) {
-      // Sort products by creation date (most recent first) and take first 10
-      const sortedProducts = products
+    if (products?.length > 0) {
+      const sorted = products
         .slice()
-        .sort((a, b) => {
-          const dateA = new Date(a.dateCreated || a.createdAt || a.created_at || a.date_created || a.creationDate || 0);
-          const dateB = new Date(b.dateCreated || b.createdAt || b.created_at || b.date_created || b.creationDate || 0);
-          
-          return dateB - dateA; // Descending order (newest first)
-        })
+        .sort((a, b) => new Date(b.dateCreated || b.createdAt || 0) - new Date(a.dateCreated || a.createdAt || 0))
         .slice(0, 10);
-      
-      setRecentProducts(sortedProducts);
+
+      setRecentProducts(sorted);
     } else {
       setRecentProducts([]);
     }
   }, [products]);
 
-  const handleAddToCart = (product) => {
+  const handleAddToCart = useCallback((product) => {
     const cartData = {
       cartId,
       productId: product.productID,
@@ -199,81 +167,47 @@ const ComboComponent = () => {
 
     dispatch(addToCart(cartData))
       .then(() => {
-        Alert.alert("Success", `${product.productName} added to cart successfully!`);
+        Alert.alert("Success", `${product.productName} added to cart!`);
       })
-      .catch((error) => {
-        Alert.alert("Error", `Failed to add product to cart: ${error.message}`);
+      .catch((err) => {
+        Alert.alert("Error", err.message || "Failed to add product");
       })
       .finally(() => {
         setAddingToCart((prev) => {
-          const newState = { ...prev };
-          delete newState[product.productID];
-          return newState;
+          const next = { ...prev };
+          delete next[product.productID];
+          return next;
         });
       });
-  };
+  }, [dispatch, cartId]);
 
-  const handleProductPress = (productID) => {
-    navigation.navigate('ProductDetails', { productID });
-  };
+  const handleToggleWishlist = useCallback((product, isInWishlist) => {
+    if (isInWishlist) {
+      Alert.alert("Info", `${product.productName} is already in wishlist.`);
+    } else {
+      dispatch(addToWishlist(product));
+      Alert.alert("Added", `${product.productName} added to wishlist ❤️`);
+    }
+  }, [dispatch]);
 
-  const handleViewAllPress = () => {
-    navigation.navigate('Products');
-  };
+  const handleProductPress = useCallback((id) => {
+    navigation.navigate('ProductDetails', { productID: id });
+  }, [navigation]);
 
-  const renderProduct = ({ item, index }) => (
-    <ProductCard 
-      product={item} 
-      index={index}
-      onPress={() => handleProductPress(item.productID)} 
-      onAddToCart={handleAddToCart}
-      isAddingToCart={addingToCart[item.productID]}
-    />
-  );
-
-  const renderSkeletonItem = ({ item, index }) => (
-    <LoadingCard key={index} />
-  );
-
-  const skeletonData = Array.from({ length: 10 }, (_, index) => ({ id: index }));
-
-  // Show skeleton while loading and no products available
-  if (loading && recentProducts.length === 0) {
+  const renderProduct = useCallback(({ item, index }) => {
+    const isInWishlist = wishlistItems.some((w) => w.productID === item.productID);
     return (
-      <View style={styles.container}>
-        {/* Header */}
-        <View style={styles.header}>
-          <View style={styles.titleContainer}>
-            <Text style={styles.title}>New Arrivals</Text>
-            <View style={styles.titleUnderline} />
-            <Text style={styles.subtitle}>Fresh picks just for you</Text>
-          </View>
-          
-          <TouchableOpacity
-            style={styles.viewAllButton}
-            onPress={handleViewAllPress}
-          >
-            <Text style={styles.viewAllText}>Shop All</Text>
-            <View style={styles.arrowContainer}>
-              <Text style={styles.arrow}>→</Text>
-            </View>
-          </TouchableOpacity>
-        </View>
-
-        {/* Skeleton Loading with FlatList structure */}
-        <FlatList
-          data={skeletonData}
-          renderItem={renderSkeletonItem}
-          keyExtractor={(item) => item.id.toString()}
-          numColumns={2}
-          columnWrapperStyle={styles.row}
-          contentContainerStyle={styles.flatListContent}
-          showsVerticalScrollIndicator={false}
-          scrollEnabled={false}
-        />
-      </View>
+      <ProductCard
+        product={item}
+        index={index}
+        onPress={() => handleProductPress(item.productID)}
+        onAddToCart={handleAddToCart}
+        isAddingToCart={addingToCart[item.productID]}
+        isInWishlist={isInWishlist}
+        onToggleWishlist={handleToggleWishlist}
+      />
     );
-  }
+  }, [wishlistItems, handleProductPress, handleAddToCart, addingToCart, handleToggleWishlist]);
 
   return (
     <View style={styles.container}>
@@ -285,10 +219,7 @@ const ComboComponent = () => {
           <Text style={styles.subtitle}>Fresh picks just for you</Text>
         </View>
         
-        <TouchableOpacity
-          style={styles.viewAllButton}
-          onPress={handleViewAllPress}
-        >
+        <TouchableOpacity style={styles.viewAllButton} onPress={() => navigation.navigate('Products')}>
           <Text style={styles.viewAllText}>Shop All</Text>
           <View style={styles.arrowContainer}>
             <Text style={styles.arrow}>→</Text>
@@ -296,16 +227,15 @@ const ComboComponent = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Products Grid */}
+      {/* Products */}
       <FlatList
         data={recentProducts}
         renderItem={renderProduct}
-        keyExtractor={(item) => item.productID?.toString() || Math.random().toString()}
+        keyExtractor={(item) => item.productID?.toString()}
         numColumns={2}
         columnWrapperStyle={styles.row}
         contentContainerStyle={styles.flatListContent}
         showsVerticalScrollIndicator={false}
-        scrollEnabled={false} // Disable scrolling if this is part of a larger scroll view
       />
     </View>
   );

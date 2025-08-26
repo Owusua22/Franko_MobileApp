@@ -21,7 +21,7 @@ import { fetchProductsByBrand, clearProducts } from '../redux/slice/productSlice
 import { addToCart } from '../redux/slice/cartSlice';
 import { AntDesign, MaterialIcons, Entypo } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-
+import { removeFromWishlist, addToWishlist } from '../redux/wishlistSlice';
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 const BrandScreen = () => {
@@ -33,6 +33,7 @@ const BrandScreen = () => {
   const productsState = useSelector((state) => state.products || { products: [], loading: false });
   const brandsState = useSelector((state) => state.brands || { brands: [], loading: false });
   const cartId = useSelector((state) => state.cart.cartId);
+  const wishlistItems = useSelector((state) => state.wishlist.items);
 
   const [selectedBrandId, setSelectedBrandId] = useState(brandId);
   const [minPrice, setMinPrice] = useState('');
@@ -299,6 +300,20 @@ const BrandScreen = () => {
     if (selectedSeller !== '') count++;
     return count;
   };
+  const handleToggleWishlist = (product) => {
+  const isInWishlist = wishlistItems.some(
+    (w) => w.productID === product.productID
+  );
+
+  if (isInWishlist) {
+    dispatch(removeFromWishlist(product.productID));
+    Alert.alert("Removed", `${product.productName} removed from wishlist.`);
+  } else {
+    dispatch(addToWishlist(product));
+    Alert.alert("Added", `${product.productName} added to wishlist ❤️`);
+  }
+};
+
 
   const renderProduct = ({ item, index }) => {
     const discount =
@@ -334,9 +349,28 @@ const BrandScreen = () => {
             </View>
           )}
 
-          <TouchableOpacity style={styles.wishlistButton}>
-            <AntDesign name="hearto" size={16} color="#666" />
-          </TouchableOpacity>
+         <TouchableOpacity
+  style={styles.wishlistButton}
+  onPress={(e) => {
+    e.stopPropagation(); // Prevent navigation
+    handleToggleWishlist(item);
+  }} 
+>
+  <AntDesign
+    name={
+      wishlistItems.some((w) => w.productID === item.productID)
+        ? "heart"
+        : "hearto"
+    }
+    size={16}
+    color={
+      wishlistItems.some((w) => w.productID === item.productID)
+        ? "red"
+        : "#666"
+    }
+  />
+</TouchableOpacity>
+
         </View>
 
         <View style={styles.productInfo}>

@@ -19,6 +19,8 @@ import { addToCart } from "../../redux/slice/cartSlice"; // Import addToCart act
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { AntDesign } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { removeFromWishlist, addToWishlist } from "../../redux/wishlistSlice";
+
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -30,6 +32,8 @@ const PhoneScreen = () => {
   );
   const cartId = useSelector((state) => state.cart.cartId); // Get cartId from Redux
   const hardcodedCategoryId = "51d1fff2-7b71-46aa-9b34-2e553a40e921";
+  const wishlistItems = useSelector((state) => state.wishlist.items);
+
 
   // State for filters and modals
   const [sortModalVisible, setSortModalVisible] = useState(false);
@@ -107,6 +111,20 @@ const PhoneScreen = () => {
     const offset = event.nativeEvent.contentOffset.y;
     setCurrentScrollOffset(offset);
   };
+  const handleToggleWishlist = (product) => {
+  const isInWishlist = wishlistItems.some(
+    (w) => w.productID === product.productID
+  );
+
+  if (isInWishlist) {
+    dispatch(removeFromWishlist(product.productID));
+    Alert.alert("Removed", `${product.productName} removed from wishlist.`);
+  } else {
+    dispatch(addToWishlist(product));
+    Alert.alert("Added", `${product.productName} added to wishlist ❤️`);
+  }
+};
+
 
   // Get unique sellers and brands from products
   const { uniqueSellers, uniqueBrands } = useMemo(() => {
@@ -299,9 +317,28 @@ const PhoneScreen = () => {
             </View>
           )}
 
-          <TouchableOpacity style={styles.wishlistButton}>
-            <AntDesign name="hearto" size={16} color="#666" />
-          </TouchableOpacity>
+         <TouchableOpacity
+  style={styles.wishlistButton}
+  onPress={(e) => {
+    e.stopPropagation(); // Prevent navigation
+    handleToggleWishlist(item);
+  }}
+>
+  <AntDesign
+    name={
+      wishlistItems.some((w) => w.productID === item.productID)
+        ? "heart"
+        : "hearto"
+    }
+    size={16}
+    color={
+      wishlistItems.some((w) => w.productID === item.productID)
+        ? "red"
+        : "#666"
+    }
+  />
+</TouchableOpacity>
+
         </View>
 
         <View style={styles.productInfo}>

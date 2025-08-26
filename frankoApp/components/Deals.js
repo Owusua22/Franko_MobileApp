@@ -17,6 +17,7 @@ import { addToCart } from "../redux/slice/cartSlice";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { AntDesign } from "@expo/vector-icons";
 import frankoLogo from "../assets/frankoIcon.png";
+import { addToWishlist } from "../redux/wishlistSlice";
 
 const screenWidth = Dimensions.get("window").width;
 const DEALS_SHOWROOM_ID = "1e93aeb7-bba7-4bd4-b017-ea3267047d46";
@@ -102,14 +103,27 @@ const LoadingCard = () => (
 );
 
 // Product Card Component (exact match with PhonesComponent)
+// Product Card Component (exact match with PhonesComponent)
 const ProductCard = ({ product, onPress, onAddToCart, isAddingToCart, index }) => {
   const [imageLoading, setImageLoading] = useState(true);
+  const dispatch = useDispatch();
+  const wishlistItems = useSelector((state) => state.wishlist.items);
 
   const discount = product.oldPrice > 0 
     ? Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100)
     : 0;
 
   const isHotDeal = index < 3; // First 3 items are "hot deals"
+  const isInWishlist = wishlistItems.some((item) => item.productID === product.productID);
+
+  const handleWishlistPress = () => {
+    if (isInWishlist) {
+      Alert.alert("Info", `${product.productName} is already in your wishlist.`);
+    } else {
+      dispatch(addToWishlist(product));
+      Alert.alert("Success", `${product.productName} added to wishlist! ❤️`);
+    }
+  };
 
   return (
     <View style={styles.productCard}>
@@ -148,8 +162,13 @@ const ProductCard = ({ product, onPress, onAddToCart, isAddingToCart, index }) =
             </View>
           )}
 
-          <TouchableOpacity style={styles.wishlistButton}>
-            <AntDesign name="hearto" size={14} color="#666" />
+          {/* Wishlist Button */}
+          <TouchableOpacity style={styles.wishlistButton} onPress={handleWishlistPress}>
+            <AntDesign
+              name={isInWishlist ? "heart" : "hearto"}
+              size={18}
+              color={isInWishlist ? "red" : "#666"}
+            />
           </TouchableOpacity>
         </View>
 
@@ -191,6 +210,7 @@ const ProductCard = ({ product, onPress, onAddToCart, isAddingToCart, index }) =
     </View>
   );
 };
+
 
 const Deals = () => {
   const dispatch = useDispatch();

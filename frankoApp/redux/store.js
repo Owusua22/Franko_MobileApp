@@ -12,6 +12,7 @@ import shippingReducer from './slice/shippingSlice';
 import showroomReducer from "./slice/showroomSlice"
 import advertismentReducer from './slice/advertismentSlice'
 import paymentReducer from './slice/paymentSlice';
+import wishlistReducer from './wishlistSlice';
 
 // Persist configuration
 const persistConfig = {
@@ -31,6 +32,7 @@ showrooms: showroomReducer,
   shipping: shippingReducer,
   advertisment: advertismentReducer,
    payment: paymentReducer,
+   wishlist : wishlistReducer
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

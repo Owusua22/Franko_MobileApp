@@ -7,6 +7,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import * as Application from "expo-application";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { loadWishlistFromStorage } from "./redux/wishlistSlice";
 
 // Screens
 import HomeScreen from './screens/HomeScreen';
@@ -50,12 +51,17 @@ import OrderCancellationScreen from './screens/OrderCancellationScreen';
 import MachineScreen from './screens/Categories/MachineScreen';
 import TermsScreen from './screens/TermsScreen';
 import FloatingTawkChat from './components/FloatingTawkChat';
+import WishlistScreen from './screens/WishlistScreen';
 
 const Stack = createStackNavigator();
 
 const WelcomeScreen = ({ onReady }) => {
   const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
+    useEffect(() => {
+    dispatch(loadWishlistFromStorage()); // Load wishlist at startup
+  }, [dispatch]);
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -113,6 +119,7 @@ const AppStack = () => (
     <Stack.Screen name="AddressManagement" component={AddressManagementScreenWithFooter} />
     <Stack.Screen name="Search" component={SearchScreen} />
     <Stack.Screen name="HelpFAQ" component={FAQScreen} />
+    <Stack.Screen name="Wishlist" component={WishlistScreen} />
   </Stack.Navigator>
 );
 

@@ -16,7 +16,7 @@ import { useNavigation } from "@react-navigation/native";
 import { fetchProductsByCategory } from "../redux/slice/productSlice";
 import { addToCart } from "../redux/slice/cartSlice";
 import { Feather } from "@expo/vector-icons";
-
+import { addToWishlist } from "../redux/wishlistSlice";
 import frankoLogo from "../assets/frankoIcon.png"; 
 
 import { AntDesign } from "@expo/vector-icons";
@@ -49,12 +49,24 @@ const LoadingCard = () => (
 // Product Card Component (exact match with BestSellers component)
 const ProductCard = ({ product, onPress, onAddToCart, isAddingToCart, index }) => {
   const [imageLoading, setImageLoading] = useState(true);
+  const dispatch = useDispatch();
+  const wishlistItems = useSelector((state) => state.wishlist.items);
 
   const discount = product.oldPrice > 0 
     ? Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100)
     : 0;
 
   const isNew = index < 3;
+  const isInWishlist = wishlistItems.some((item) => item.productID === product.productID);
+
+  const handleWishlistPress = () => {
+    if (isInWishlist) {
+      Alert.alert("Info", `${product.productName} is already in your wishlist.`);
+    } else {
+      dispatch(addToWishlist(product));
+      Alert.alert("Success", `${product.productName} added to wishlist! ❤️`);
+    }
+  };
 
   return (
     <View style={styles.productCard}>
@@ -66,7 +78,7 @@ const ProductCard = ({ product, onPress, onAddToCart, isAddingToCart, index }) =
         <View style={styles.imageContainer}>
           {imageLoading && (
             <View style={styles.imageLoadingContainer}>
-              <ActivityIndicator size="large" color="#16A34A" />
+              <ActivityIndicator size="large" color="#E63946" />
             </View>
           )}
           
@@ -80,12 +92,15 @@ const ProductCard = ({ product, onPress, onAddToCart, isAddingToCart, index }) =
             onLoad={() => setImageLoading(false)}
             onError={() => setImageLoading(false)}
           />
-          
+          {/* New Badge */}
           {isNew && (
             <View style={styles.newBadge}>
               <Text style={styles.newBadgeText}>NEW</Text>
             </View>
           )}
+          
+          {/* Discount Badge */}
+        
           
           {discount > 0 && (
             <View style={styles.discountBadge}>
@@ -93,8 +108,13 @@ const ProductCard = ({ product, onPress, onAddToCart, isAddingToCart, index }) =
             </View>
           )}
 
-          <TouchableOpacity style={styles.wishlistButton}>
-            <AntDesign name="hearto" size={14} color="#666" />
+          {/* Wishlist Button */}
+          <TouchableOpacity style={styles.wishlistButton} onPress={handleWishlistPress}>
+            <AntDesign
+              name={isInWishlist ? "heart" : "hearto"}
+              size={18}
+              color={isInWishlist ? "red" : "#666"}
+            />
           </TouchableOpacity>
         </View>
 
@@ -136,6 +156,7 @@ const ProductCard = ({ product, onPress, onAddToCart, isAddingToCart, index }) =
     </View>
   );
 };
+
 
 const FridgeComponent = () => {
   const dispatch = useDispatch();
