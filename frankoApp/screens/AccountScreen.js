@@ -251,10 +251,7 @@ const AccountScreen = () => {
                 <Icon name="check-circle" size={16} color="#fff" />
                 <Text style={styles.benefitText}>Save your wishlist</Text>
               </View>
-              <View style={styles.benefitItem}>
-                <Icon name="check-circle" size={16} color="#fff" />
-                <Text style={styles.benefitText}>Get exclusive offers</Text>
-              </View>
+             
             </View>
 
             <TouchableOpacity 

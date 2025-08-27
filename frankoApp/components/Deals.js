@@ -617,7 +617,7 @@ const styles = StyleSheet.create({
   },
   
   productList: { 
-    paddingLeft: 20,
+
     paddingRight: 10,
     paddingVertical: 20,
   },

@@ -11,6 +11,8 @@ import TelevisionComponent from '../components/TelevisionComponent';
 import AppliancesComponent from '../components/AppliancesComponent';
 import SpeakerComponent from '../components/SpeakersComponent';
 import Deals from '../components/Deals';
+import BestSellers from '../components/BestSellers';
+import Explore from '../components/Explore';
 
 const HomeScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
@@ -20,6 +22,8 @@ const HomeScreen = () => {
  
     { key: 'categorycomponent', component: <CategoryComponent /> },
     { key: 'deals', component: <Deals /> },
+    {key: 'bestsellers', component: <BestSellers/>} ,
+    {key: 'explore', component: <Explore/>} ,
       
     {key:"phonecomponent", component:<PhonesComponent/>},
     {key:"laptopcomponent", component:<LaptopComponent/>},

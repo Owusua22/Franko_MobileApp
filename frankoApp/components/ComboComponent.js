@@ -13,23 +13,36 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchProducts, resetProducts } from '../redux/slice/productSlice';
 import { addToCart } from '../redux/slice/cartSlice';
-import { addToWishlist } from "../redux/wishlistSlice"; // ✅ FIX: import
+import { addToWishlist } from "../redux/wishlistSlice";
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { AntDesign } from '@expo/vector-icons';
 
+import frankoLogo from "../assets/frankoIcon.png"; // Import the Franko logo
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = 170;
 const CARD_MARGIN = 8;
 
-// ✅ FIX: correct function name
 const formatCurrency = (price) =>
   new Intl.NumberFormat('en-GH', {
     style: 'currency',
     currency: 'GHS',
   }).format(price || 0);
 
-// ✅ Memoized Product Card (prevents unnecessary re-renders)
+// Loading Card Component (matches PhonesComponent style exactly)
+const LoadingCard = () => (
+  <View style={styles.loadingCard}>
+    <View style={styles.loadingImage}>
+      <Image source={frankoLogo} style={styles.frankoLogo} />
+    </View>
+    <View style={styles.loadingContent}>
+      <View style={styles.loadingTitle} />
+      <View style={styles.loadingPrice} />
+    </View>
+  </View>
+);
+
+// Memoized Product Card (prevents unnecessary re-renders)
 const ProductCard = memo(({ product, index, onPress, onAddToCart, isAddingToCart, isInWishlist, onToggleWishlist }) => {
   const [imageLoading, setImageLoading] = useState(true);
 
@@ -49,7 +62,7 @@ const ProductCard = memo(({ product, index, onPress, onAddToCart, isAddingToCart
         <View style={styles.imageContainer}>
           {imageLoading && (
             <View style={styles.imageLoadingContainer}>
-              <ActivityIndicator size="large" color="#E63946" />
+              <ActivityIndicator size="large" color="#16A34A" />
             </View>
           )}
           
@@ -79,7 +92,7 @@ const ProductCard = memo(({ product, index, onPress, onAddToCart, isAddingToCart
             <AntDesign
               name={isInWishlist ? "heart" : "hearto"}
               size={18}
-              color={isInWishlist ? "red" : "#666"}
+              color={isInWishlist ? "#EF4444" : "#6B7280"}
             />
           </TouchableOpacity>
         </View>
@@ -194,20 +207,34 @@ const ComboComponent = () => {
     navigation.navigate('ProductDetails', { productID: id });
   }, [navigation]);
 
-  const renderProduct = useCallback(({ item, index }) => {
-    const isInWishlist = wishlistItems.some((w) => w.productID === item.productID);
-    return (
-      <ProductCard
-        product={item}
-        index={index}
-        onPress={() => handleProductPress(item.productID)}
-        onAddToCart={handleAddToCart}
-        isAddingToCart={addingToCart[item.productID]}
-        isInWishlist={isInWishlist}
-        onToggleWishlist={handleToggleWishlist}
-      />
-    );
-  }, [wishlistItems, handleProductPress, handleAddToCart, addingToCart, handleToggleWishlist]);
+  // Render products with proper loading state
+  const renderProducts = () => {
+    if (loading) {
+      // Show loading skeleton cards in 2x2 grid format
+      return Array(10).fill().map((_, idx) => <LoadingCard key={idx} />);
+    }
+
+    if (recentProducts.length === 0) {
+      // Show loading skeleton if no products available
+      return Array(10).fill().map((_, idx) => <LoadingCard key={idx} />);
+    }
+
+    return recentProducts.map((product, index) => {
+      const isInWishlist = wishlistItems.some((w) => w.productID === product.productID);
+      return (
+        <ProductCard
+          key={product.productID}
+          product={product}
+          index={index}
+          onPress={() => handleProductPress(product.productID)}
+          onAddToCart={handleAddToCart}
+          isAddingToCart={addingToCart[product.productID]}
+          isInWishlist={isInWishlist}
+          onToggleWishlist={handleToggleWishlist}
+        />
+      );
+    });
+  };
 
   return (
     <View style={styles.container}>
@@ -227,16 +254,10 @@ const ComboComponent = () => {
         </TouchableOpacity>
       </View>
 
-      {/* Products */}
-      <FlatList
-        data={recentProducts}
-        renderItem={renderProduct}
-        keyExtractor={(item) => item.productID?.toString()}
-        numColumns={2}
-        columnWrapperStyle={styles.row}
-        contentContainerStyle={styles.flatListContent}
-        showsVerticalScrollIndicator={false}
-      />
+      {/* Products Grid - Using custom render function instead of FlatList */}
+      <View style={styles.productsGrid}>
+        {renderProducts()}
+      </View>
     </View>
   );
 };
@@ -308,26 +329,25 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   
-  flatListContent: {
-    paddingBottom: 20
-  },
-  row: {
+  // Products Grid Container
+  productsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     justifyContent: 'space-between',
+    paddingBottom: 20,
   },
 
-  // Product Card Styles (matching Deals component exactly)
+  // Product Card Styles (matching PhonesComponent exactly)
   productCard: {
     backgroundColor: "#fff",
     padding: 6,
     borderRadius: 12,
     width: CARD_WIDTH,
-    marginRight: CARD_MARGIN,
-    marginLeft: 10,
+    marginBottom: 20,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.9,
     shadowRadius: 2,
     elevation: 5,
-    marginBottom: 20,
     height: 240,
   },
   
@@ -366,7 +386,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 8,
     left: 8,
-    backgroundColor: "#ff4757",
+    backgroundColor: "#E63946",
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,
@@ -377,16 +397,15 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 10,
     fontWeight: "bold",
-    textTransform: "uppercase",
   },
   
   discountBadge: {
     position: "absolute",
     top: 8,
     right: 8,
-    backgroundColor: "#ff4757",
+    backgroundColor: "#EF4444",
     paddingHorizontal: 6,
-    paddingVertical: 2,
+    paddingVertical: 3,
     borderRadius: 8,
     zIndex: 2,
   },
@@ -395,7 +414,6 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 10,
     fontWeight: "bold",
-    textTransform: "uppercase",
   },
   
   wishlistButton: {
@@ -410,24 +428,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 4,
     elevation: 4,
-  },
-  
-  outOfStockOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 3,
-  },
-  
-  outOfStockText: {
-    color: '#ffffff',
-    fontSize: 14,
-    fontWeight: 'bold',
   },
   
   productInfo: {
@@ -477,30 +477,25 @@ const styles = StyleSheet.create({
   },
   
   addToCartButtonDisabled: {
-    backgroundColor: "#7dd3c0",
+    backgroundColor: "#9CA3AF",
   },
   
-  // Loading Card Styles (matching product card exactly)
-  skeletonContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-  },
-  
+  // Loading Card Styles (matching PhonesComponent exactly)
   loadingCard: {
     width: CARD_WIDTH,
-    marginRight: CARD_MARGIN,
     backgroundColor: "#fff",
     borderRadius: 12,
     overflow: "hidden",
     height: 240,
-    marginBottom: 20,
-    marginLeft: 10,
+    marginBottom: 16,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.9,
-    shadowRadius: 2,
-    elevation: 5,
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 8,
   },
   
   loadingImage: {

@@ -18,9 +18,9 @@ const CarouselComponent = () => {
   return (
     <View style={styles.container}>
       {loading ? (
-        <Image source={require("../assets/na.jpeg")} style={styles.image} />
+        <Image source={require("../assets/kumasi.jpg")} style={styles.image} />
       ) : advertisments.length === 0 ? (
-        <Image source={require("../assets/na.jpeg")} style={styles.image} />
+        <Image source={require("../assets/kumasi.jpg")} style={styles.image} />
       ) : (
       <Swiper
   autoplay={advertisments.length > 1}

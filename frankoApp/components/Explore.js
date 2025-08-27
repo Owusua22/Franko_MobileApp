@@ -17,7 +17,7 @@ import frankoLogo from "../assets/frankoIcon.png";
 import { addToWishlist } from "../redux/wishlistSlice";
 
 const screenWidth = Dimensions.get("window").width;
-const DEALS_SHOWROOM_ID = "fca9d386-2904-4e13-a0cb-4f183aa274af";
+const DEALS_SHOWROOM_ID = "910812e9-cd1e-449a-a5bb-b74b29836569";
 const CARD_MARGIN = 8;
 const CARD_WIDTH = 170;
 
@@ -148,7 +148,7 @@ const ProductCard = ({ product, onPress, onAddToCart, isAddingToCart, index }) =
   );
 };
 
-const BestSellers = () => {
+const Explore = () => {
   const dispatch = useDispatch();
   const navigation = useNavigation();
   const { productsByShowroom, loading } = useSelector((state) => state.products);
@@ -232,18 +232,25 @@ const BestSellers = () => {
         <View style={styles.showroomHeader}>
           <View style={styles.headerContent}>
             <View style={styles.headerLeft}>
-              <View style={styles.iconContainer}>
+             <View style={styles.iconContainer}>
                 <View style={styles.iconGlow} />
-                <Icon name="trending-up" size={20} color="#fff" />
+                <View style={styles.iconInner}>
+                  <Icon name="fire" size={22} color="#fff" />
+                </View>
               </View>
               <View style={styles.headerTextContainer}>
                 <View style={styles.titleRow}>
-                  <Text style={styles.showroomTitle}>Best Sellers</Text>
+                  <Text style={styles.showroomTitle}>Explore</Text>
+                    
                   <View style={styles.hotBadge}>
                     <Text style={styles.hotBadgeText}>HOT</Text>
+
                   </View>
+                   
+                  
                 </View>
-                <Text style={styles.showroomSubtitle}>⚡ Trending now </Text>
+                <Text style={styles.showroomSubtitle}>⚡ Popular now </Text>
+              
               </View>
             </View>
             
@@ -729,4 +736,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default BestSellers;
+export default Explore;

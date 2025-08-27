@@ -213,7 +213,7 @@ export default App;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#f8fafc',
   },
   statusBarBackground: {
     height: Platform.OS === 'android' ? RNStatusBar.currentHeight : 0,

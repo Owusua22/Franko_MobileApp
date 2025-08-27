@@ -16,11 +16,14 @@ import { useNavigation } from '@react-navigation/native';
 const brands = [
   { id: '760af684-7a19-46ab-acc5-7445ef32073a', logo: require('../assets/samsung.png'), name: 'Samsung', color: '#059669' },
   { id: 'c163ee86-1d24-4c97-943b-1f82a09c6066', logo: require('../assets/infinix.png'), name: 'Infinix', color: '#16a34a' },
+  { id: '4c1dba1d-61b2-4ec3-9c03-38036dd02c89', logo: require('../assets/itel.png'), name: 'Itel', color: '#14b8a6' },
   { id: 'fb694e59-77be-455f-9573-acf917ffb39d', logo: require('../assets/hmd.png'), name: 'HMD', color: '#22c55e' },
   { id: '86cca959-70a4-448e-86f1-3601309f49a6', logo: require('../assets/tecno-logo.png'), name: 'Tecno', color: '#15803d' },
   { id: '5c6cf9ae-d44f-42a9-82e5-c82bbf6913cd', logo: require('../assets/apple.jpeg'), name: 'Apple', color: '#166534' },
   { id: 'd643698d-f794-4d33-9237-4a913aa463a2', logo: require('../assets/huawel.jpeg'), name: 'Huawei', color: '#0f766e' },
+  
 ];
+  
 
 const BrandCard = React.memo(({ brand, index, onLayout }) => {
   const navigation = useNavigation();
