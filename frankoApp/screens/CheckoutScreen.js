@@ -10,7 +10,7 @@ import {
   Alert,
   StyleSheet,
   AppState,
-  StatusBar,
+
 } from "react-native";
 import { useDispatch } from "react-redux";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -31,13 +31,119 @@ const CheckoutScreen = ({ navigation }) => {
   const [recipientContactNumber, setRecipientContactNumber] = useState("");
   const [recipientAddress, setRecipientAddress] = useState("");
   const [loading, setLoading] = useState(false);
-  const [shippingDetails, setShippingDetails] = useState({ locationCharge: 0 });
+  const [shippingDetails, setShippingDetails] = useState({ 
+    locationCharge: 0,
+    isFree: false,
+    isNA: false
+  });
   const [locationModalVisible, setLocationModalVisible] = useState(false);
   const [manualAddressVisible, setManualAddressVisible] = useState(false);
   const [appState, setAppState] = useState(AppState.currentState);
   const [paymentCheckInterval, setPaymentCheckInterval] = useState(null);
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [usedOrderIds, setUsedOrderIds] = useState(new Set());
+
+  // Helper function to check if delivery is free (string values only)
+  const isFreeDelivery = (deliveryFee) => {
+    if (typeof deliveryFee !== 'string') return false;
+    const normalizedFee = deliveryFee.toLowerCase().trim();
+    return normalizedFee === "free delivery" || 
+           normalizedFee === "free" || 
+           normalizedFee === "free delivery" ||
+           normalizedFee.includes("free");
+  };
+
+  // Helper function to check if delivery is N/A (charges may apply)
+  const isNADelivery = (deliveryFee) => {
+    return deliveryFee === "N/A" || 
+           deliveryFee === "n/a" || 
+           deliveryFee === 0 || 
+           deliveryFee === "0" ||
+           deliveryFee === null || 
+           deliveryFee === undefined;
+  };
+
+  // Helper function to check if Cash on Delivery should be available
+  const isCashOnDeliveryAvailable = () => {
+    // Not available for manual addresses
+    if (manualAddressVisible) {
+      return false;
+    }
+    
+    // Not available if no location is selected
+    if (!selectedLocation) {
+      return false;
+    }
+    
+    const fee = selectedLocation.town?.delivery_fee;
+    
+    // Only available for genuine free delivery (string values like "Free delivery")
+    return isFreeDelivery(fee);
+  };
+
+  // Helper function to get safe delivery fee for calculations
+  const getSafeDeliveryFee = () => {
+    if (manualAddressVisible || !selectedLocation) {
+      return 0;
+    }
+    
+    const fee = selectedLocation.town?.delivery_fee;
+    
+    // If it's free delivery (string), return 0 for calculations
+    if (isFreeDelivery(fee)) {
+      return 0;
+    }
+    
+    // If it's numeric and greater than 0, return the numeric value
+    if (typeof fee === 'number' && fee > 0) {
+      return fee;
+    }
+    
+    // If it's a string that can be parsed to a number > 0
+    if (typeof fee === 'string') {
+      const parsed = parseFloat(fee);
+      if (!isNaN(parsed) && parsed > 0) {
+        return parsed;
+      }
+    }
+    
+    // Default to 0 for all other cases (including numeric 0, null, undefined, "N/A")
+    return 0;
+  };
+
+  // Helper function to format delivery fee display
+  const formatDeliveryFeeDisplay = () => {
+    if (manualAddressVisible) {
+      return "Delivery charges may apply";
+    }
+    
+    if (!selectedLocation) {
+      return "N/A";
+    }
+    
+    const fee = selectedLocation.town?.delivery_fee;
+    
+    // Check for genuine free delivery first (string values)
+    if (isFreeDelivery(fee)) {
+      return "FREE";
+    }
+    
+    // Check for numeric fees greater than 0
+    if (typeof fee === 'number' && fee > 0) {
+      return `GH₵${fee.toFixed(2)}`;
+    }
+    
+    // Check for string fees that can be parsed to numbers > 0
+    if (typeof fee === 'string') {
+      const parsed = parseFloat(fee);
+      if (!isNaN(parsed) && parsed > 0) {
+        return `GH₵${parsed.toFixed(2)}`;
+      }
+    }
+    
+    // For all other cases (0, null, undefined, "N/A")
+    return "Delivery charges may apply";
+  };
 
   // Generate unique 6-7 digit order ID in format APP-XXX-XXX
   const generateOrderId = () => {
@@ -82,11 +188,22 @@ const CheckoutScreen = ({ navigation }) => {
 
         if (savedLocation) {
           setSelectedLocation(savedLocation);
-          setShippingDetails({ locationCharge: savedLocation.town.delivery_fee });
+          const deliveryFee = savedLocation.town?.delivery_fee;
+          
+          // Updated shipping details logic
+          setShippingDetails({ 
+            locationCharge: deliveryFee,
+            isFree: isFreeDelivery(deliveryFee),
+            isNA: isNADelivery(deliveryFee)
+          });
           setRecipientAddress(`${savedLocation.town.name}, ${savedLocation.region}`);
         } else {
           setRecipientAddress("");
-          setShippingDetails({ locationCharge: 0 });
+          setShippingDetails({ 
+            locationCharge: 0,
+            isFree: false,
+            isNA: true
+          });
         }
 
         // Load previously used order IDs from storage
@@ -131,7 +248,7 @@ const CheckoutScreen = ({ navigation }) => {
     return () => subscription?.remove();
   }, [appState]);
 
-  // Payment status monitoring - now includes Credit/Debit Card
+  // Payment status monitoring with auto-redirect
   useEffect(() => {
     let intervalId;
 
@@ -144,26 +261,33 @@ const CheckoutScreen = ({ navigation }) => {
         const response = action?.payload;
 
         if (response?.responseCode === "0000") {
+          // Payment successful
           if (intervalId) clearInterval(intervalId);
           await AsyncStorage.removeItem("pendingOrderId");
           setPaymentCheckInterval(null);
           
           await processPaymentSuccess(orderId);
           
-          Alert.alert(
-            "Payment Successful!",
-            "Your order has been placed successfully.",
-            [{ text: "OK", onPress: () => navigation.navigate("OrderReceivedScreen") }]
-          );
-        } else if (response?.responseCode === "2001") {
+          // Auto-redirect to success page
+          navigation.navigate("OrderPlacedScreen",{ orderId: orderId });
+          
+        } else if (response?.responseCode === "2001" || response?.responseCode === "2002") {
+          // Payment cancelled or failed
           if (intervalId) clearInterval(intervalId);
           await AsyncStorage.removeItem("pendingOrderId");
           setPaymentCheckInterval(null);
           
+          // Auto-redirect to cancellation page or show alert and stay on checkout
           Alert.alert(
             "Payment Cancelled",
             "Your payment was cancelled or failed. Please try again.",
-            [{ text: "OK" }]
+            [{ 
+              text: "OK",
+              onPress: () => {
+              // You can create a cancellation screen or just stay here
+                navigation.navigate("OrderCancellationScreen");
+              }
+            }]
           );
         }
       } catch (error) {
@@ -204,14 +328,15 @@ const CheckoutScreen = ({ navigation }) => {
         await AsyncStorage.removeItem("pendingOrderId");
         await processPaymentSuccess(orderId);
         
-        Alert.alert(
-          "Payment Successful!",
-          "Your order has been placed successfully.",
-          [{ text: "OK", onPress: () => navigation.navigate("OrderReceivedScreen") }]
-        );
-      } else if (response?.responseCode === "2001") {
+        // Auto-redirect to success page
+        navigation.navigate("OrderPlacedScreen", { orderId: orderId });
+        
+      } else if (response?.responseCode === "2001" || response?.responseCode === "2002") {
         await AsyncStorage.removeItem("pendingOrderId");
-        Alert.alert("Payment Failed", "Your payment was not successful. Please try again.");
+        Alert.alert(
+          "Payment Failed", 
+          "Your payment was not successful. Please try again."
+        );
       }
     } catch (error) {
       console.error("Payment status check error:", error);
@@ -242,11 +367,21 @@ const CheckoutScreen = ({ navigation }) => {
   const handleLocationSelect = async (locationData) => {
     try {
       setSelectedLocation(locationData);
-      setShippingDetails({ locationCharge: locationData.town.delivery_fee });
+      const deliveryFee = locationData.town?.delivery_fee;
+      
+      // Updated shipping details logic
+      setShippingDetails({ 
+        locationCharge: deliveryFee,
+        isFree: isFreeDelivery(deliveryFee),
+        isNA: isNADelivery(deliveryFee)
+      });
       setRecipientAddress(`${locationData.town.name}, ${locationData.region}`);
       
       // Reset manual address mode when location is selected
       setManualAddressVisible(false);
+      
+      // Clear payment method to force user to select again based on new delivery conditions
+      setPaymentMethod("");
       
       await AsyncStorage.setItem("selectedLocation", JSON.stringify(locationData));
       
@@ -264,7 +399,11 @@ const CheckoutScreen = ({ navigation }) => {
     if (newManualAddressVisible) {
       // When switching to manual mode, clear location data
       setSelectedLocation(null);
-      setShippingDetails({ locationCharge: 0 });
+      setShippingDetails({ 
+        locationCharge: 0,
+        isFree: false,
+        isNA: true
+      });
       setRecipientAddress("");
       // Clear payment method to force user to select again
       setPaymentMethod("");
@@ -275,7 +414,7 @@ const CheckoutScreen = ({ navigation }) => {
 
   const handleCheckout = async () => {
     // Check for guest name validation
-    const isGuestName = recipientName.toLowerCase().trim() === "Guest" || 
+    const isGuestName = recipientName.toLowerCase().trim() === "guest" || 
                        recipientName.toLowerCase().trim() === "guest user" ||
                        recipientName.toLowerCase().trim().includes("guest");
     
@@ -333,16 +472,6 @@ const CheckoutScreen = ({ navigation }) => {
         "Contact Number Required", 
         "Please enter the recipient's contact number.",
         [{ text: "OK" }]
-      );
-      return;
-    }
-
-    // For manual address, don't allow Cash on Delivery
-    if (paymentMethod === "Cash on Delivery" && (manualAddressVisible || shippingDetails.locationCharge === 0)) {
-      Alert.alert(
-        "Payment Method Not Available", 
-        "Cash on Delivery is not available for manual addresses or your selected location. Please select another payment method.",
-        [{ text: "Choose Payment" }]
       );
       return;
     }
@@ -515,19 +644,22 @@ const CheckoutScreen = ({ navigation }) => {
   };
 
   const calculateTotalAmount = () => {
-    return (
-      cartItems.reduce((total, item) => total + (item.amount || item.total || 0), 0) +
-      (shippingDetails.locationCharge || 0)
-    );
+    const subtotal = cartItems.reduce((total, item) => total + (item.amount || item.total || 0), 0);
+    const deliveryFee = getSafeDeliveryFee();
+    
+    // For manual addresses or delivery charges may apply cases, don't add delivery fee to total
+    if (manualAddressVisible || isNADelivery(selectedLocation?.town?.delivery_fee)) {
+      return subtotal;
+    }
+    
+    return subtotal + deliveryFee;
   };
 
   const getAvailablePaymentMethods = () => {
     const methods = ["Mobile Money", "Credit/Debit Card"];
  
-    if (!manualAddressVisible && 
-        selectedLocation && 
-        shippingDetails.locationCharge > 0 && 
-        shippingDetails.locationCharge !== "N/A") {
+    // Add Cash on Delivery only when it's available (only for genuine free delivery)
+    if (isCashOnDeliveryAvailable()) {
       methods.unshift("Cash on Delivery");
     }
 
@@ -639,12 +771,28 @@ const CheckoutScreen = ({ navigation }) => {
                 </View>
 
                 {selectedLocation && (
-                  <View style={styles.deliveryInfoCard}>
-                    <Ionicons name="car-outline" size={16} color="#059669" />
-                    <Text style={styles.deliveryInfoText}>
-                      Delivery Fee: {selectedLocation.town.delivery_fee === 0 
-                        ? "N/A" 
-                        : `GH₵${selectedLocation.town.delivery_fee}`
+                  <View style={[
+                    styles.deliveryInfoCard,
+                    isFreeDelivery(selectedLocation.town?.delivery_fee) && styles.freeDeliveryCard,
+                    isNADelivery(selectedLocation.town?.delivery_fee) && styles.naDeliveryCard
+                  ]}>
+                    <Ionicons 
+                      name={isFreeDelivery(selectedLocation.town?.delivery_fee) ? "gift-outline" : 
+                            isNADelivery(selectedLocation.town?.delivery_fee) ? "information-circle-outline" : "car-outline"} 
+                      size={16} 
+                      color={isFreeDelivery(selectedLocation.town?.delivery_fee) ? "#10B981" : 
+                             isNADelivery(selectedLocation.town?.delivery_fee) ? "#F59E0B" : "#059669"} 
+                    />
+                    <Text style={[
+                      styles.deliveryInfoText,
+                      isFreeDelivery(selectedLocation.town?.delivery_fee) && styles.freeDeliveryText,
+                      isNADelivery(selectedLocation.town?.delivery_fee) && styles.naDeliveryText
+                    ]}>
+                      {formatDeliveryFeeDisplay() === "FREE" 
+                        ? "Free Delivery!" 
+                        : formatDeliveryFeeDisplay() === "Delivery charges may apply"
+                        ? "Delivery charges may apply"
+                        : `Delivery Fee: ${formatDeliveryFeeDisplay()}`
                       }
                     </Text>
                   </View>
@@ -661,7 +809,7 @@ const CheckoutScreen = ({ navigation }) => {
                   numberOfLines={4}
                   placeholderTextColor="#9CA3AF"
                 />
-               
+           
               </View>
             )}
 
@@ -747,7 +895,7 @@ const CheckoutScreen = ({ navigation }) => {
             </TouchableOpacity>
           ))}
 
-          
+        
         </View>
 
         {/* Order Summary Card */}
@@ -801,10 +949,12 @@ const CheckoutScreen = ({ navigation }) => {
             </View>
             <View style={styles.summaryRow}>
               <Text style={styles.summaryLabel}>Delivery Fee</Text>
-              <Text style={styles.summaryValue}>
-                {(manualAddressVisible || shippingDetails.locationCharge === 0) ? 
-                  "N/A" : 
-                  `GH₵${shippingDetails.locationCharge.toFixed(2)}`}
+              <Text style={[
+                styles.summaryValue,
+                isFreeDelivery(selectedLocation?.town?.delivery_fee) && styles.freeDeliveryValue,
+                (isNADelivery(selectedLocation?.town?.delivery_fee) || manualAddressVisible) && styles.naDeliveryValue
+              ]}>
+                {formatDeliveryFeeDisplay()}
               </Text>
             </View>
             <View style={[styles.summaryRow, styles.totalRow]}>
@@ -816,8 +966,6 @@ const CheckoutScreen = ({ navigation }) => {
           </View>
         </View>
       </ScrollView>
-
-   
 
       {/* Place Order Button */}
       <View style={styles.bottomSection}>
@@ -972,7 +1120,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     gap: 6,
   },
-
   addressButtonText: {
     color: "#fff",
     fontWeight: "600",
@@ -989,10 +1136,46 @@ const styles = StyleSheet.create({
     gap: 8,
     marginTop: 12,
   },
+  freeDeliveryCard: {
+    backgroundColor: "#F0FDF4",
+    borderColor: "#BBF7D0",
+  },
+  naDeliveryCard: {
+    backgroundColor: "#FEF3C7",
+    borderColor: "#FCD34D",
+  },
   deliveryInfoText: {
     fontSize: 14,
     color: "#059669",
     fontWeight: "500",
+  },
+  freeDeliveryText: {
+    color: "#10B981",
+    fontWeight: "600",
+  },
+  naDeliveryText: {
+    color: "#F59E0B",
+    fontWeight: "600",
+  },
+  manualAddressContainer: {
+    marginTop: 12,
+  },
+  manualAddressInfo: {
+    backgroundColor: "#F3F4F6",
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    borderRadius: 8,
+    padding: 12,
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 8,
+    marginTop: 12,
+  },
+  manualAddressInfoText: {
+    flex: 1,
+    fontSize: 14,
+    color: "#6B7280",
+    lineHeight: 20,
   },
   manualAddressToggle: {
     flexDirection: "row",
@@ -1002,13 +1185,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
     marginTop: 8,
   },
+  toggleContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
   manualAddressToggleText: {
     color: "#059669",
     fontSize: 14,
     fontWeight: "500",
-  },
-  manualAddressContainer: {
-    marginTop: 12,
   },
   paymentOption: {
     flexDirection: "row",
@@ -1066,6 +1251,23 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     backgroundColor: "#059669",
   },
+  paymentInfo: {
+    backgroundColor: "#F9FAFB",
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    borderRadius: 8,
+    padding: 12,
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 8,
+    marginTop: 8,
+  },
+  paymentInfoText: {
+    flex: 1,
+    fontSize: 14,
+    color: "#6B7280",
+    lineHeight: 20,
+  },
   warningCard: {
     backgroundColor: "#FEF3C7",
     borderWidth: 1,
@@ -1077,7 +1279,7 @@ const styles = StyleSheet.create({
     gap: 8,
     marginTop: 12,
   },
-  warningText: {
+  warningTextSmall: {
     flex: 1,
     fontSize: 14,
     color: "#92400E",
@@ -1109,8 +1311,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   orderItemName: {
-    fontSize: 14,
-    fontWeight: "500",
+    fontSize: 12,
+    fontWeight: "400",
     color: "#1F2937",
     marginBottom: 2,
   },
@@ -1152,6 +1354,14 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#1F2937",
     fontWeight: "500",
+  },
+  freeDeliveryValue: {
+    color: "#10B981",
+    fontWeight: "600",
+  },
+  naDeliveryValue: {
+    color: "#F59E0B",
+    fontWeight: "600",
   },
   totalRow: {
     marginTop: 8,

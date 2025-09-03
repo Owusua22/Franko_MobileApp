@@ -3,9 +3,7 @@ import {
   View,
   Text,
   Modal,
-  TextInput,
   TouchableOpacity,
-  FlatList,
   StyleSheet,
   Dimensions,
   ScrollView,
@@ -24,191 +22,192 @@ const ChevronIcon = ({ isExpanded }) => (
     color="#4A5568" 
   />
 );
-
 const locations = [
-    {
-      region: "Greater Accra",
-      towns: [
-        { name: "Tema", delivery_fee: 45 },
-        { name: "Kasoa", delivery_fee: 45 },
-        { name: "Airport", delivery_fee: 40 },
-        { name: "Weija", delivery_fee: 40 },
-        { name: "Ashaiman", delivery_fee: 45 },
-        { name: "Dome", delivery_fee: 35 },
-        { name: "Madina", delivery_fee: 45 },
-        { name: "Adenta", delivery_fee: 45 },
-        { name: "Gbawe", delivery_fee: 40 },
-        { name: "Nungua", delivery_fee: 40 },
-        { name: "Teshie", delivery_fee: 40 },
-        { name: "Nsakina", delivery_fee: 50 },
-        { name: "Sowtoum", delivery_fee: 40 },
-        { name: "Amasaman", delivery_fee: 45 },
-        { name: "Ofankor", delivery_fee: 40 },
-        { name: "Kwabenya", delivery_fee: 40 },
-        { name: "Achimota", delivery_fee: 35 },
-        { name: "Ablekuma", delivery_fee: 45 },
-        { name: "Dansoman", delivery_fee: 40 },
-        { name: "Sakumono", delivery_fee: 45 },
-        { name: "Lashibi", delivery_fee: 45 },
-        { name: "Oyibi", delivery_fee: 40 },
-        { name: "Kokrobite", delivery_fee: 45 },
-        { name: "Bortianor", delivery_fee: 45 },
-        { name: "Abokobi", delivery_fee: 40 },
-        { name: "Aburi", delivery_fee: 0 },
-        { name: "Somanya", delivery_fee: 0 },
-        { name: "Dodowa", delivery_fee: 0 },
-        { name: "Prampram", delivery_fee: 0 },
-        { name: "Kpone", delivery_fee: 45 },
-        { name: "Shai Hills", delivery_fee: 0 },
-        { name: "Ada Foah", delivery_fee: 0 },
-        { name: "Dawhenya", delivery_fee: 0 },
-        { name: "Afienya", delivery_fee: 45 },
-        { name: "Dunkonah", delivery_fee: 0 },
-        { name: "Apollonia", delivery_fee: 0 },
-        { name: "Oshiyie", delivery_fee: 0 },
-        { name: "Michel Camp", delivery_fee: 40 },
-        { name: "Asutuare", delivery_fee: 0 },
-        { name: "Akuse", delivery_fee: 0 },
-        { name: "Kpoguno", delivery_fee: 0 },
-        { name: "Obom", delivery_fee: 0 },
-        { name: "Mamahuma", delivery_fee: 0 },
-        { name: "Adabraka", delivery_fee: 30 },
-        { name: "Cantoments", delivery_fee: 30 },
-        { name: "Ridge", delivery_fee: 30 },
-        { name: "Lapaz", delivery_fee: 35 },
-        { name: "Osu", delivery_fee: 30 },
-        { name: "Abeka", delivery_fee: 35 },
-        { name: "New Town Kotobabi", delivery_fee: 30 },
-        { name: "Dwowulu", delivery_fee: 35 },
-        { name: "Agbobloshie", delivery_fee: 35 },
-        { name: "East Legon", delivery_fee: 40 }
-      ]
-    },
-    {
-        region: "Ashanti",
-        towns: [
-          { name: "Kumasi", delivery_fee: 0 },
-          { name: "Obuasi", delivery_fee: 0 },
-          { name: "Konongo", delivery_fee: 0 },
-          { name: "Mampong", delivery_fee: 0 },
-          { name: "Ejisu", delivery_fee: 0 },
-          { name: "Bekwai", delivery_fee: 0 },
-          { name: "Effiduasi", delivery_fee: 0 },
-          { name: "Juaben", delivery_fee: 0 },
-          { name: "Asante Mampong", delivery_fee: 0 },
-          { name: "Asokwa", delivery_fee: 30 },
-          { name: "Oforikrom", delivery_fee: 30 },
-          { name: "Bantama", delivery_fee: 30 },
-          { name: "Tafo", delivery_fee: 30 },
-          { name: "Asawasi", delivery_fee: 30 },
-          { name: "Ahinsan", delivery_fee: 35 },
-          { name: "Manhyia", delivery_fee: 30 },
-          { name: "Suame", delivery_fee: 30 },
-          { name: "Kwadaso", delivery_fee: 35 },
-          { name: "Asokore Mampong", delivery_fee: 35 },
-          { name: "Krofrom", delivery_fee: 30 },
-          { name: "Ayigya", delivery_fee: 35 },
-          { name: "Old Tafo", delivery_fee: 30 },
-          { name: "Ahwiaa", delivery_fee: 35 },
-          { name: "Agona", delivery_fee: 0 },
-          { name: "Boadi", delivery_fee: 35 },
-          { name: "Adansi", delivery_fee: 0 },
-          { name: "Fomena", delivery_fee: 0 },
-          { name: "Tepa", delivery_fee: 0 },
-          { name: "Jacobu", delivery_fee: 0 },
-          { name: "Asankare", delivery_fee: 0 },
-          { name: "Akrokeri", delivery_fee: 0 },
-          { name: "Agogo", delivery_fee: 0 },
-          { name: "Konongo Odumasi", delivery_fee: 0 },
-          { name: "Mamponteng", delivery_fee: 40 },
-          { name: "Atimatim", delivery_fee: 40 },
-          { name: "Pankrono", delivery_fee: 35 },
-          { name: "Buokrom Estates", delivery_fee: 30 },
-          { name: "Pankrono Estates", delivery_fee: 30 },
-          { name: "Akrokerri", delivery_fee: 0 },
-          { name: "Nyinahin", delivery_fee: 0 },
-          { name: "Sepe", delivery_fee: 30 },
-          { name: "Offinso", delivery_fee: 0 },
-          { name: "Maakro", delivery_fee: 30 },
-          { name: "Kotei", delivery_fee: 35 },
-          { name: "Ayeduase", delivery_fee: 35 },
-          { name: "Kenyase", delivery_fee: 35 },
-          { name: "Ahenkro", delivery_fee: 0 },
-          { name: "Akomadan Afrancho", delivery_fee: 0 },
-          { name: "Kodie", delivery_fee: 0 },
-          { name: "Kronom Afrancho", delivery_fee: 35 },
-          { name: "Meduma", delivery_fee: 35 },
-          { name: "Barekese", delivery_fee: 0 },
-          { name: "Edwenase", delivery_fee: 0 },
-          { name: "Brofoyedru", delivery_fee: 0 },
-          { name: "Mampongten", delivery_fee: 0 },
-          { name: "Nsuta", delivery_fee: 0 },
-          { name: "Kwamo", delivery_fee: 0 },
-          { name: "Asuokyene", delivery_fee: 0 },
-          { name: "Ananekrom", delivery_fee: 0 },
-          { name: "Aputuogya", delivery_fee: 0 },
-          { name: "Asaam", delivery_fee: 0 },
-          { name: "Asaatey", delivery_fee: 0 },
-          { name: "Asempaneye", delivery_fee: 0 },
-          { name: "Asuadee", delivery_fee: 0 },
-          { name: "Asuoho", delivery_fee: 0 },
-          { name: "Asuogya", delivery_fee: 0 },
-          { name: "Atasamanso", delivery_fee: 0 },
-          { name: "Atonsu", delivery_fee: 0 },
-          { name: "Atwima Agogo", delivery_fee: 0 },
-          { name: "Atwima Akyempim", delivery_fee: 0 },
-          { name: "Atwima Apraman", delivery_fee: 0 },
-          { name: "Atwima Atweban", delivery_fee: 0 },
-          { name: "Atwima Dida", delivery_fee: 0 },
-          { name: "Atwima Bonsu", delivery_fee: 0 },
-          { name: "Atwima Dunkwa", delivery_fee: 0 },
-          { name: "Atwima Kankana", delivery_fee: 0 },
-          { name: "Atwima Koforidua", delivery_fee: 0 },
-          { name: "Atwima Mansukrom", delivery_fee: 0 },
-          { name: "Atwima Nkoransa", delivery_fee: 0 },
-          { name: "Atwima Nkorbra", delivery_fee: 0 },
-          { name: "Atwima Nkwanta", delivery_fee: 0 },
-          { name: "Atwima Odumasi", delivery_fee: 0 },
-          { name: "Atwima Oforikrom", delivery_fee: 0 },
-          { name: "Atwima Tafrakwa", delivery_fee: 0 },
-          { name: "Atwima Yayaaso", delivery_fee: 0 },
-          { name: "Bonkron", delivery_fee: 0 },
-          { name: "Bontodiase", delivery_fee: 0 },
-          { name: "Bowiesakrom", delivery_fee: 0 },
-          { name: "Dampai", delivery_fee: 0 },
-          { name: "Diawuo", delivery_fee: 0 },
-          { name: "Domenya", delivery_fee: 0 },
-          { name: "Dukuben", delivery_fee: 0 },
-          { name: "Esireso", delivery_fee: 0 },
-          { name: "Fakopa", delivery_fee: 0 },
-          { name: "Fenchi", delivery_fee: 0 },
-          { name: "Foase", delivery_fee: 0 },
-          { name: "Fumso", delivery_fee: 0 },
-          { name: "Hia", delivery_fee: 0 },
-          { name: "Hwidiem", delivery_fee: 0 },
-          { name: "Jacobu", delivery_fee: 0 },
-          { name: "Kaben", delivery_fee: 0 },
-          { name: "Kankawura", delivery_fee: 0 },
-          { name: "Kenyasi", delivery_fee: 0 },
-          { name: "Kotey", delivery_fee: 0 },
-          { name: "Kumedi", delivery_fee: 0 },
-          { name: "Kwadwoakrom", delivery_fee: 0 },
-          { name: "Kwaaman", delivery_fee: 0 },
-          { name: "Libona", delivery_fee: 0 },
-          { name: "Mampongteng", delivery_fee: 0 },
-          { name: "Mankrong", delivery_fee: 0 },
-          { name: "Nyamebekyere", delivery_fee: 0 },
-          { name: "Obogu", delivery_fee: 0 },
-          { name: "Ofari", delivery_fee: 0 },
-          { name: "Ohwim", delivery_fee: 0 },
-          { name: "Potromu", delivery_fee: 0 },
-          { name: "Yaati", delivery_fee: 0 },
-          { name: "Yawhima", delivery_fee: 0 },
-          { name: "Yawyawkrom", delivery_fee: 0 },
-          { name: "Yenya", delivery_fee: 0 }
-        ]
-      },
-      
+  {
+  region: "Greater Accra",
+  towns: [
+    { name: "Tema", delivery_fee: "Free delivery" },
+    { name: "Kasoa", delivery_fee: "Free delivery" },
+    { name: "Airport", delivery_fee: "Free delivery" },
+    { name: "Weija", delivery_fee: "Free delivery" },
+    { name: "Ashaiman", delivery_fee: "Free delivery" },
+    { name: "Dome", delivery_fee: "Free delivery" },
+    { name: "Madina", delivery_fee: "Free delivery" },
+    { name: "Adenta", delivery_fee: "Free delivery" },
+    { name: "Gbawe", delivery_fee: "Free delivery" },
+    { name: "Nungua", delivery_fee: "Free delivery" },
+    { name: "Teshie", delivery_fee: "Free delivery" },
+    { name: "Nsakina", delivery_fee: "Free delivery" },
+    { name: "Sowtoum", delivery_fee: "Free delivery" },
+    { name: "Amasaman", delivery_fee: "Free delivery" },
+    { name: "Ofankor", delivery_fee: "Free delivery" },
+    { name: "Kwabenya", delivery_fee: "Free delivery" },
+    { name: "Achimota", delivery_fee: "Free delivery" },
+    { name: "Ablekuma", delivery_fee: "Free delivery" },
+    { name: "Dansoman", delivery_fee: "Free delivery" },
+    { name: "Sakumono", delivery_fee: "Free delivery" },
+    { name: "Lashibi", delivery_fee: "Free delivery" },
+    { name: "Oyibi", delivery_fee: "Free delivery" },
+    { name: "Kokrobite", delivery_fee: "Free delivery" },
+    { name: "Bortianor", delivery_fee: "Free delivery" },
+    { name: "Abokobi", delivery_fee: "Free delivery" },
+    { name: "Aburi", delivery_fee: "Free delivery" },
+    { name: "Somanya", delivery_fee: "Free delivery" },
+    { name: "Dodowa", delivery_fee: "Free delivery" },
+    { name: "Prampram", delivery_fee: "Free delivery" },
+    { name: "Kpone", delivery_fee: "Free delivery" },
+    { name: "Shai Hills", delivery_fee: "Free delivery" },
+    { name: "Ada Foah", delivery_fee: "Free delivery" },
+    { name: "Dawhenya", delivery_fee: "Free delivery" },
+    { name: "Afienya", delivery_fee: "Free delivery" },
+    { name: "Dunkonah", delivery_fee: "Free delivery" },
+    { name: "Apollonia", delivery_fee: "Free delivery" },
+    { name: "Oshiyie", delivery_fee: "Free delivery" },
+    { name: "Michel Camp", delivery_fee: "Free delivery" },
+    { name: "Asutuare", delivery_fee: "Free delivery" },
+    { name: "Akuse", delivery_fee: "Free delivery" },
+    { name: "Kpoguno", delivery_fee: "Free delivery" },
+    { name: "Obom", delivery_fee: "Free delivery" },
+    { name: "Mamahuma", delivery_fee: "Free delivery" },
+    { name: "Adabraka", delivery_fee: "Free delivery" },
+    { name: "Cantoments", delivery_fee: "Free delivery" },
+    { name: "Ridge", delivery_fee: "Free delivery" },
+    { name: "Lapaz", delivery_fee: "Free delivery" },
+    { name: "Osu", delivery_fee: "Free delivery" },
+    { name: "Abeka", delivery_fee: "Free delivery" },
+    { name: "New Town Kotobabi", delivery_fee: "Free delivery" },
+    { name: "Dwowulu", delivery_fee: "Free delivery" },
+    { name: "Agbobloshie", delivery_fee: "Free delivery" },
+    { name: "East Legon", delivery_fee: "Free delivery" }
+  ]
+},
+{
+    region: "Ashanti",
+  
+  towns: [
+    { name: "Kumasi", delivery_fee: 0 },
+    { name: "Obuasi", delivery_fee: 0 },
+    { name: "Konongo", delivery_fee: 0 },
+    { name: "Mampong", delivery_fee: 0 },
+    { name: "Ejisu", delivery_fee: 0 },
+    { name: "Bekwai", delivery_fee: 0 },
+    { name: "Effiduasi", delivery_fee: 0 },
+    { name: "Juaben", delivery_fee: 0 },
+    { name: "Asante Mampong", delivery_fee: 0 },
+    { name: "Asokwa", delivery_fee: "Free delivery" },
+    { name: "Oforikrom", delivery_fee: "Free delivery" },
+    { name: "Bantama", delivery_fee: "Free delivery" },
+    { name: "Tafo", delivery_fee: "Free delivery" },
+    { name: "Asawasi", delivery_fee: "Free delivery" },
+    { name: "Ahinsan", delivery_fee: "Free delivery" },
+    { name: "Manhyia", delivery_fee: "Free delivery" },
+    { name: "Suame", delivery_fee: "Free delivery" },
+    { name: "Kwadaso", delivery_fee: "Free delivery" },
+    { name: "Asokore Mampong", delivery_fee: "Free delivery" },
+    { name: "Krofrom", delivery_fee: "Free delivery" },
+    { name: "Ayigya", delivery_fee: "Free delivery" },
+    { name: "Old Tafo", delivery_fee: "Free delivery" },
+    { name: "Ahwiaa", delivery_fee: "Free delivery" },
+    { name: "Agona", delivery_fee: 0 },
+    { name: "Boadi", delivery_fee: "Free delivery" },
+    { name: "Adansi", delivery_fee: 0 },
+    { name: "Fomena", delivery_fee: 0 },
+    { name: "Tepa", delivery_fee: 0 },
+    { name: "Jacobu", delivery_fee: 0 },
+    { name: "Asankare", delivery_fee: 0 },
+    { name: "Akrokeri", delivery_fee: 0 },
+    { name: "Agogo", delivery_fee: 0 },
+    { name: "Konongo Odumasi", delivery_fee: 0 },
+    { name: "Mamponteng", delivery_fee: "Free delivery" },
+    { name: "Atimatim", delivery_fee: "Free delivery" },
+    { name: "Pankrono", delivery_fee: "Free delivery" },
+    { name: "Buokrom Estates", delivery_fee: "Free delivery" },
+    { name: "Pankrono Estates", delivery_fee: "Free delivery" },
+    { name: "Akrokerri", delivery_fee: 0 },
+    { name: "Nyinahin", delivery_fee: 0 },
+    { name: "Sepe", delivery_fee: "Free delivery" },
+    { name: "Offinso", delivery_fee: 0 },
+    { name: "Maakro", delivery_fee: "Free delivery" },
+    { name: "Kotei", delivery_fee: "Free delivery" },
+    { name: "Ayeduase", delivery_fee: "Free delivery" },
+    { name: "Kenyase", delivery_fee: "Free delivery" },
+    { name: "Ahenkro", delivery_fee: 0 },
+    { name: "Akomadan Afrancho", delivery_fee: 0 },
+    { name: "Kodie", delivery_fee: 0 },
+    { name: "Kronom Afrancho", delivery_fee: "Free delivery" },
+    { name: "Meduma", delivery_fee: "Free delivery" },
+    { name: "Barekese", delivery_fee: 0 },
+    { name: "Edwenase", delivery_fee: 0 },
+    { name: "Brofoyedru", delivery_fee: 0 },
+    { name: "Mampongten", delivery_fee: 0 },
+    { name: "Nsuta", delivery_fee: 0 },
+    { name: "Kwamo", delivery_fee: 0 },
+    { name: "Asuokyene", delivery_fee: 0 },
+    { name: "Ananekrom", delivery_fee: 0 },
+    { name: "Aputuogya", delivery_fee: 0 },
+    { name: "Asaam", delivery_fee: 0 },
+    { name: "Asaatey", delivery_fee: 0 },
+    { name: "Asempaneye", delivery_fee: 0 },
+    { name: "Asuadee", delivery_fee: 0 },
+    { name: "Asuoho", delivery_fee: 0 },
+    { name: "Asuogya", delivery_fee: 0 },
+    { name: "Atasamanso", delivery_fee: 0 },
+    { name: "Atonsu", delivery_fee: 0 },
+    { name: "Atwima Agogo", delivery_fee: 0 },
+    { name: "Atwima Akyempim", delivery_fee: 0 },
+    { name: "Atwima Apraman", delivery_fee: 0 },
+    { name: "Atwima Atweban", delivery_fee: 0 },
+    { name: "Atwima Dida", delivery_fee: 0 },
+    { name: "Atwima Bonsu", delivery_fee: 0 },
+    { name: "Atwima Dunkwa", delivery_fee: 0 },
+    { name: "Atwima Kankana", delivery_fee: 0 },
+    { name: "Atwima Koforidua", delivery_fee: 0 },
+    { name: "Atwima Mansukrom", delivery_fee: 0 },
+    { name: "Atwima Nkoransa", delivery_fee: 0 },
+    { name: "Atwima Nkorbra", delivery_fee: 0 },
+    { name: "Atwima Nkwanta", delivery_fee: 0 },
+    { name: "Atwima Odumasi", delivery_fee: 0 },
+    { name: "Atwima Oforikrom", delivery_fee: 0 },
+    { name: "Atwima Tafrakwa", delivery_fee: 0 },
+    { name: "Atwima Yayaaso", delivery_fee: 0 },
+    { name: "Bonkron", delivery_fee: 0 },
+    { name: "Bontodiase", delivery_fee: 0 },
+    { name: "Bowiesakrom", delivery_fee: 0 },
+    { name: "Dampai", delivery_fee: 0 },
+    { name: "Diawuo", delivery_fee: 0 },
+    { name: "Domenya", delivery_fee: 0 },
+    { name: "Dukuben", delivery_fee: 0 },
+    { name: "Esireso", delivery_fee: 0 },
+    { name: "Fakopa", delivery_fee: 0 },
+    { name: "Fenchi", delivery_fee: 0 },
+    { name: "Foase", delivery_fee: 0 },
+    { name: "Fumso", delivery_fee: 0 },
+    { name: "Hia", delivery_fee: 0 },
+    { name: "Hwidiem", delivery_fee: 0 },
+    { name: "Jacobu", delivery_fee: 0 },
+    { name: "Kaben", delivery_fee: 0 },
+    { name: "Kankawura", delivery_fee: 0 },
+    { name: "Kenyasi", delivery_fee: 0 },
+    { name: "Kotey", delivery_fee: 0 },
+    { name: "Kumedi", delivery_fee: 0 },
+    { name: "Kwadwoakrom", delivery_fee: 0 },
+    { name: "Kwaaman", delivery_fee: 0 },
+    { name: "Libona", delivery_fee: 0 },
+    { name: "Mampongteng", delivery_fee: 0 },
+    { name: "Mankrong", delivery_fee: 0 },
+    { name: "Nyamebekyere", delivery_fee: 0 },
+    { name: "Obogu", delivery_fee: 0 },
+    { name: "Ofari", delivery_fee: 0 },
+    { name: "Ohwim", delivery_fee: 0 },
+    { name: "Potromu", delivery_fee: 0 },
+    { name: "Yaati", delivery_fee: 0 },
+    { name: "Yawhima", delivery_fee: 0 },
+    { name: "Yawyawkrom", delivery_fee: 0 },
+    { name: "Yenya", delivery_fee: 0 }
+  ]
+
+
+  },
     {
       region: "Eastern",
       towns: [
@@ -448,6 +447,45 @@ const locations = [
 },
 
     ];
+
+
+// Updated utility function to check if delivery is free
+// Only "Free delivery" string is considered truly free, 0 means no delivery available (isFree = false)
+const isFreeDelivery = (deliveryFee) => {
+  return deliveryFee === "Free delivery";
+};
+
+// Utility function to format delivery fee for display
+const formatDeliveryFee = (deliveryFee) => {
+  if (deliveryFee === "Free delivery") {
+    return "Free";
+  }
+  if (deliveryFee === 0) {
+    return "N/A";
+  }
+  return `GH₵${deliveryFee}`;
+};
+
+// Utility function to get delivery fee color
+const getDeliveryFeeColor = (deliveryFee) => {
+  if (deliveryFee === "Free delivery") {
+    return {
+      background: "#C6F6D5",
+      text: "#22543D"
+    };
+  }
+  if (deliveryFee === 0) {
+    return {
+      background: "#FED7D7", 
+      text: "#C53030"
+    };
+  }
+  return {
+    background: "#BEE3F8", 
+    text: "#2B6CB0"
+  };
+};
+
 const LocationsModal = ({ isVisible, onClose, onLocationSelect, selectedLocation }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedRegions, setExpandedRegions] = useState(new Set());
@@ -494,7 +532,13 @@ const LocationsModal = ({ isVisible, onClose, onLocationSelect, selectedLocation
   };
 
   const handleLocationSelect = (town, region) => {
-    const locationData = { town, region };
+    const locationData = { 
+      town, 
+      region,
+      deliveryFee: town.delivery_fee,
+      // CRITICAL: Only "Free delivery" string sets isFree to true, 0 sets isFree to false
+      isFree: isFreeDelivery(town.delivery_fee) // This will be false when delivery_fee is 0
+    };
     onLocationSelect(locationData);
   };
 
@@ -503,9 +547,21 @@ const LocationsModal = ({ isVisible, onClose, onLocationSelect, selectedLocation
     onClose();
   };
 
+  // Custom fee display logic for town items
+  const getDeliveryFeeDisplay = (fee) => {
+    if (fee === 0) {
+      return "N/A"; // No delivery available
+    }
+    if (fee === "Free delivery") {
+      return "Free Delivery"; // Free delivery available
+    }
+    return `GH₵${fee}`; // Paid delivery
+  };
+
   const renderTownItem = (town, regionName, index) => {
     const isSelected = selectedLocation?.town?.name === town.name && 
                       selectedLocation?.region === regionName;
+    const colors = getDeliveryFeeColor(town.delivery_fee);
     
     return (
       <TouchableOpacity
@@ -524,17 +580,16 @@ const LocationsModal = ({ isVisible, onClose, onLocationSelect, selectedLocation
           ]}>
             {town.name}
           </Text>
-
         </View>
         <View style={[
           styles.deliveryFeeTag,
-          town.delivery_fee === 0 ? styles.freeDelivery : styles.paidDelivery
+          { backgroundColor: colors.background }
         ]}>
           <Text style={[
             styles.deliveryFeeText,
-            town.delivery_fee === 0 ? styles.freeDeliveryText : styles.paidDeliveryText
+            { color: colors.text }
           ]}>
-            {town.delivery_fee === 0 ? 'N/A' : `GH₵${town.delivery_fee}`}
+            {getDeliveryFeeDisplay(town.delivery_fee)}
           </Text>
         </View>
       </TouchableOpacity>
@@ -562,7 +617,6 @@ const LocationsModal = ({ isVisible, onClose, onLocationSelect, selectedLocation
             </TouchableOpacity>
           </View>
 
-     
           {/* Content */}
           <ScrollView 
             style={styles.contentContainer}
@@ -574,36 +628,43 @@ const LocationsModal = ({ isVisible, onClose, onLocationSelect, selectedLocation
                 <Text style={styles.emptyStateText}>No locations found</Text>
               </View>
             ) : (
-              filteredLocations.map((region) => (
-                <View key={region.region} style={styles.regionContainer}>
-                  <TouchableOpacity
-                    style={styles.regionHeader}
-                    onPress={() => toggleRegion(region.region)}
-                    activeOpacity={0.7}
-                  >
-                    <Text style={styles.regionName}>{region.region}</Text>
-                    <View style={styles.regionMeta}>
-                      <View style={styles.townCount}>
-                        <Text style={styles.townCountText}>{region.towns.length} towns</Text>
+              filteredLocations.map((region) => {
+                const freeDeliveryCount = region.towns.filter(town => isFreeDelivery(town.delivery_fee)).length;
+                
+                return (
+                  <View key={region.region} style={styles.regionContainer}>
+                    <TouchableOpacity
+                      style={styles.regionHeader}
+                      onPress={() => toggleRegion(region.region)}
+                      activeOpacity={0.7}
+                    >
+                      <View style={styles.regionInfo}>
+                        <Text style={styles.regionName}>{region.region}</Text>
+                    
                       </View>
-                      <ChevronIcon isExpanded={expandedRegions.has(region.region)} />
-                    </View>
-                  </TouchableOpacity>
-
-                  {expandedRegions.has(region.region) && (
-                    <View style={styles.townsList}>
-                      {region.towns.map((town, index) => (
-                        <View key={`${region.region}-${town.name}-${index}`}>
-                          {renderTownItem(town, region.region, index)}
-                          {index < region.towns.length - 1 && (
-                            <View style={styles.townSeparator} />
-                          )}
+                      <View style={styles.regionMeta}>
+                        <View style={styles.townCount}>
+                          <Text style={styles.townCountText}>{region.towns.length} towns</Text>
                         </View>
-                      ))}
-                    </View>
-                  )}
-                </View>
-              ))
+                        <ChevronIcon isExpanded={expandedRegions.has(region.region)} />
+                      </View>
+                    </TouchableOpacity>
+
+                    {expandedRegions.has(region.region) && (
+                      <View style={styles.townsList}>
+                        {region.towns.map((town, index) => (
+                          <View key={`${region.region}-${town.name}-${index}`}>
+                            {renderTownItem(town, region.region, index)}
+                            {index < region.towns.length - 1 && (
+                              <View style={styles.townSeparator} />
+                            )}
+                          </View>
+                        ))}
+                      </View>
+                    )}
+                  </View>
+                );
+              })
             )}
           </ScrollView>
         </View>
@@ -627,7 +688,6 @@ const styles = StyleSheet.create({
     maxWidth: 400,
     maxHeight: screenHeight * 0.8,
     overflow: 'hidden',
-    // Add explicit flex structure
     flex: 0,
   },
   modalHeader: {
@@ -637,9 +697,7 @@ const styles = StyleSheet.create({
     padding: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#E2E8F0',
-   
     backgroundColor: '#059669',
-    // Ensure header doesn't flex
     flexShrink: 0,
   },
   modalTitle: {
@@ -656,7 +714,6 @@ const styles = StyleSheet.create({
     padding: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#F7FAFC',
-    // Ensure search doesn't flex
     flexShrink: 0,
   },
   searchInputContainer: {
@@ -675,12 +732,10 @@ const styles = StyleSheet.create({
     color: '#2D3748',
   },
   contentContainer: {
-    // Remove flex: 1 and add explicit height constraint
-    maxHeight: screenHeight * 0.8 - 150, // Subtract approximate header + search height
+    maxHeight: screenHeight * 0.8 - 150,
     backgroundColor: 'white',
   },
   scrollContentContainer: {
-    // Add padding to scroll content
     paddingBottom: 20,
     flexGrow: 1,
   },
@@ -704,10 +759,19 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#E2E8F0',
   },
+  regionInfo: {
+    flex: 1,
+  },
   regionName: {
     fontSize: 16,
     fontWeight: '500',
     color: '#1A202C',
+  },
+  freeDeliveryIndicator: {
+    fontSize: 12,
+    color: '#059669',
+    fontWeight: '500',
+    marginTop: 2,
   },
   regionMeta: {
     flexDirection: 'row',
@@ -738,7 +802,7 @@ const styles = StyleSheet.create({
   selectedTownItem: {
     backgroundColor: '#EBF8FF',
     borderLeftWidth: 3,
-    borderLeftColor: '#AD2831',
+    borderLeftColor: '#059669',
   },
   townContent: {
     flex: 1,
@@ -749,35 +813,17 @@ const styles = StyleSheet.create({
     color: '#1A202C',
   },
   selectedTownName: {
-    color: '#AD2831',
+    color: '#059669',
     fontWeight: '600',
-  },
-  regionLabel: {
-    fontSize: 12,
-    color: '#718096',
-    marginTop: 2,
   },
   deliveryFeeTag: {
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,
   },
- 
-  freeDelivery: {
-    backgroundColor: '#C6F6D5',
-  },
-  paidDelivery: {
-    backgroundColor: '#BEE3F8',
-  },
   deliveryFeeText: {
     fontSize: 12,
     fontWeight: '500',
-  },
-  freeDeliveryText: {
-    color: '#22543D',
-  },
-  paidDeliveryText: {
-    color: '#2B6CB0',
   },
   townSeparator: {
     height: 1,

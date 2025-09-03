@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Platform } from 'react-native';
-import Icon from 'react-native-vector-icons/Feather'; // Changed to Feather for modern icons
+import Icon from 'react-native-vector-icons/Feather';
 import { useNavigation } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
-import { loadCart } from '../redux/slice/cartSlice';
+import { loadCart, clearCart } from '../redux/slice/cartSlice'; // Make sure clearCart is imported
 
 const SearchIcon = ({ size = 20, color = '#6B7280' }) => (
   <Icon name="search" size={size} color={color} />
@@ -16,10 +16,18 @@ const Header = () => {
   const { totalItems, cart } = useSelector((state) => state.cart);
 
   useEffect(() => {
-    if (!cart || cart.length === 0) {
+    // Load cart when component mounts
+    dispatch(loadCart());
+  }, [dispatch]);
+
+  // Add focus listener to reload cart when screen comes into focus
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
       dispatch(loadCart());
-    }
-  }, [dispatch, cart]);
+    });
+
+    return unsubscribe;
+  }, [navigation, dispatch]);
 
   const navigateToCart = () => {
     navigation.navigate('cart');
@@ -40,17 +48,18 @@ const Header = () => {
           />
         </TouchableOpacity>
 
-{/* Search Bar */}
-<TouchableOpacity
-  style={styles.searchContainer}
-  onPress={() => navigation.navigate('Search')}
-  activeOpacity={0.8}
->
-  <View style={styles.searchIconContainer}>
-    <SearchIcon />
-  </View>
-  <Text style={styles.searchPlaceholder}>Search products...</Text>
-</TouchableOpacity>
+        {/* Search Bar */}
+        <TouchableOpacity
+          style={styles.searchContainer}
+          onPress={() => navigation.navigate('Search')}
+          activeOpacity={0.8}
+        >
+          <View style={styles.searchIconContainer}>
+            <SearchIcon />
+          </View>
+          <Text style={styles.searchPlaceholder}>Search products...</Text>
+        </TouchableOpacity>
+
         {/* Modern Cart Icon with Badge */}
         <TouchableOpacity 
           style={styles.cartWrapper} 
@@ -75,17 +84,9 @@ const Header = () => {
 
 const styles = StyleSheet.create({
   headerWrapper: {
-
-    paddingTop: Platform.OS === 'ios' ? 5 : 10,
-    paddingBottom: 10,
-    paddingHorizontal: 4,
-    shadowColor: '#000',
-  
-
-    shadowRadius: 8,
-    elevation: 2,
-    borderBottomColor: '#F1F5F9',
-    borderBottomWidth: 1,
+    backgroundColor: '#FFFFFF',
+    paddingBottom: 2,
+    paddingHorizontal: 2,
   },
   innerContainer: {
     flexDirection: 'row',
@@ -107,9 +108,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#F8FAFC',
     borderRadius: 25,
-  
-    height: 48,
- 
+    height: 38,
     borderWidth: 1,
     borderColor: '#E2E8F0',
     shadowColor: '#000',
@@ -120,13 +119,13 @@ const styles = StyleSheet.create({
   },
   searchIconContainer: {
     paddingHorizontal: 8,
-    paddingVertical: 2,
+
   },
-  searchInput: {
+  searchPlaceholder: {
     flex: 1,
-    fontSize: 16,
-    color: '#1F2937',
-    paddingVertical: 12,
+    fontSize: 12,
+    color: '#9CA3AF',
+   
     paddingRight: 16,
     fontWeight: '400',
   },
@@ -157,7 +156,6 @@ const styles = StyleSheet.create({
     height: 24,
     justifyContent: 'center',
     alignItems: 'center',
-
     borderWidth: 2,
     borderColor: '#FFFFFF',
     shadowColor: '#EF4444',
@@ -174,4 +172,5 @@ const styles = StyleSheet.create({
     lineHeight: 14,
   },
 });
+
 export default Header;

@@ -142,7 +142,7 @@ Join thousands of happy customers! 🌟`;
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="light-content" backgroundColor="#5DD39E" />
+
       
       <GradientView colors={['#5DD39E', '#51C878', '#3CB371']} style={styles.container}>
         {/* Decorative circles */}

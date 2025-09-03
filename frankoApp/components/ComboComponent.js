@@ -20,7 +20,7 @@ import { AntDesign } from '@expo/vector-icons';
 import frankoLogo from "../assets/frankoIcon.png"; // Import the Franko logo
 
 const { width } = Dimensions.get('window');
-const CARD_WIDTH = 170;
+const CARD_WIDTH = 165;
 const CARD_MARGIN = 8;
 
 const formatCurrency = (price) =>
@@ -340,7 +340,7 @@ const styles = StyleSheet.create({
   // Product Card Styles (matching PhonesComponent exactly)
   productCard: {
     backgroundColor: "#fff",
-    padding: 6,
+    padding: 10,
     borderRadius: 12,
     width: CARD_WIDTH,
     marginBottom: 20,

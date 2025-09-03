@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { SafeAreaView, StyleSheet, View, Text, ActivityIndicator, Image, StatusBar as RNStatusBar, Platform, Alert, Linking } from 'react-native';
+import { SafeAreaView, StyleSheet, View, Text, ActivityIndicator, Image, StatusBar as RNStatusBar, Platform, Alert, Linking, Animated, Dimensions } from 'react-native';
 import { StatusBar } from "expo-status-bar";
 import { Provider, useDispatch } from 'react-redux';
 import { store } from './redux/store';
@@ -8,6 +8,8 @@ import { createStackNavigator } from '@react-navigation/stack';
 import * as Application from "expo-application";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { loadWishlistFromStorage } from "./redux/wishlistSlice";
+import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 
 // Screens
 import HomeScreen from './screens/HomeScreen';
@@ -54,30 +56,156 @@ import FloatingTawkChat from './components/FloatingTawkChat';
 import WishlistScreen from './screens/WishlistScreen';
 
 const Stack = createStackNavigator();
+const { width, height } = Dimensions.get('window');
 
 const WelcomeScreen = ({ onReady }) => {
   const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
-    useEffect(() => {
-    dispatch(loadWishlistFromStorage()); // Load wishlist at startup
-  }, [dispatch]);
-
+  
+  // Animation values
+  const fadeAnim = useState(new Animated.Value(0))[0];
+  const scaleAnim = useState(new Animated.Value(0.3))[0];
+  const slideAnim = useState(new Animated.Value(50))[0];
+  const pulseAnim = useState(new Animated.Value(1))[0];
 
   useEffect(() => {
+    dispatch(loadWishlistFromStorage());
+  }, [dispatch]);
+
+  useEffect(() => {
+    // Start animations
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 1000,
+        useNativeDriver: true,
+      }),
+      Animated.spring(scaleAnim, {
+        toValue: 1,
+        tension: 50,
+        friction: 7,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 800,
+        delay: 300,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
+    // Pulse animation for logo
+    const pulseLoop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 1.1,
+          duration: 1500,
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 1500,
+          useNativeDriver: true,
+        }),
+      ])
+    );
+    pulseLoop.start();
+
     const fetchData = async () => {
       await new Promise((resolve) => setTimeout(resolve, 3000));
       setLoading(false);
       onReady();
     };
     fetchData();
-  }, [dispatch, onReady]);
+
+    return () => pulseLoop.stop();
+  }, [dispatch, onReady, fadeAnim, scaleAnim, slideAnim, pulseAnim]);
 
   return (
-    <View style={styles.welcomeContainer}>
-      <Image source={require('./assets/frankoIcon.png')} style={styles.logo} />
-      <Text style={styles.welcomeText}>Welcome to Franko Trading Ent!</Text>
-      {loading && <ActivityIndicator size="large" color="#e63946" />}
-    </View>
+    <LinearGradient
+      colors={['#BBF7D0', '#10B981', '#059669']}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={styles.welcomeContainer}
+    >
+      {/* Background Pattern */}
+      <View style={styles.backgroundPattern}>
+        {[...Array(20)].map((_, i) => (
+          <View 
+            key={i} 
+            style={[
+              styles.patternDot, 
+              { 
+                left: `${Math.random() * 100}%`, 
+                top: `${Math.random() * 100}%`,
+                opacity: 0.1 + Math.random() * 0.2
+              }
+            ]} 
+          />
+        ))}
+      </View>
+
+      <Animated.View 
+        style={[
+          styles.contentWrapper,
+          {
+            opacity: fadeAnim,
+            transform: [{ scale: scaleAnim }]
+          }
+        ]}
+      >
+        {/* Logo Container */}
+        <Animated.View 
+          style={[
+            styles.logoContainer,
+            {
+              transform: [{ scale: pulseAnim }]
+            }
+          ]}
+        >
+          <View style={styles.logoShadow}>
+            <Image 
+              source={require('./assets/frankoIcon.png')} 
+              style={styles.logo}
+              resizeMode="contain"
+            />
+          </View>
+        </Animated.View>
+
+        {/* Welcome Text */}
+        <Animated.View 
+          style={[
+            styles.textContainer,
+            {
+              transform: [{ translateY: slideAnim }]
+            }
+          ]}
+        >
+          <Text style={styles.welcomeTitle}>Welcome to</Text>
+          <Text style={styles.companyName}>Franko Trading Ent</Text>
+          <Text style={styles.tagline}>Your trusted electronics partner</Text>
+        </Animated.View>
+
+        {/* Loading Indicator */}
+        {loading && (
+          <Animated.View 
+            style={[
+              styles.loadingContainer,
+              {
+                opacity: fadeAnim,
+                transform: [{ translateY: slideAnim }]
+              }
+            ]}
+          >
+            <ActivityIndicator size="large" color="#ffffff" />
+            <Text style={styles.loadingText}>Phone Papa fie...</Text>
+          </Animated.View>
+        )}
+      </Animated.View>
+
+      {/* Bottom Wave */}
+      <View style={styles.bottomWave} />
+    </LinearGradient>
   );
 };
 
@@ -123,75 +251,131 @@ const AppStack = () => (
   </Stack.Navigator>
 );
 
-const App = () => {
+// Safe Area Wrapper Component for Android
+const SafeAreaWrapper = ({ children }) => {
+  const insets = useSafeAreaInsets();
+  
+  return (
+    <View style={[
+      styles.safeAreaWrapper,
+      Platform.OS === 'android' && { 
+        paddingBottom: Math.max(insets.bottom, 2)
+      }
+    ]}>
+      {children}
+    </View>
+  );
+};
+
+// Function to compare version numbers
+const isVersionOlder = (currentVersion, latestVersion) => {
+  const current = currentVersion.split('.').map(Number);
+  const latest = latestVersion.split('.').map(Number);
+  
+  for (let i = 0; i < Math.max(current.length, latest.length); i++) {
+    const currentPart = current[i] || 0;
+    const latestPart = latest[i] || 0;
+    
+    if (currentPart < latestPart) return true;
+    if (currentPart > latestPart) return false;
+  }
+  return false;
+};
+
+// Main App Content Component
+const AppContent = () => {
   const [showWelcome, setShowWelcome] = useState(true);
 
   const handleReady = () => setShowWelcome(false);
-useEffect(() => {
-  const checkAppVersion = async () => {
-    try {
-      const currentVersion = Application.nativeApplicationVersion; // e.g. "57.0.1"
 
-      // TODO: Replace with dynamic value from server
-      const latestVersion = "57.0.2";
+  useEffect(() => {
+    const checkAppVersion = async () => {
+      try {
+        const currentVersion = Application.nativeApplicationVersion;
+        
+        // TODO: Replace with dynamic value from server
+        const latestVersion = "57.0.2";
 
-      if (currentVersion !== latestVersion) {
-        // Check if we already showed this alert
-        const alreadyShown = await AsyncStorage.getItem("updateAlertShown");
+        // Only show update alert if current version is older than latest version
+        if (isVersionOlder(currentVersion, latestVersion)) {
+          // Check if we already showed this alert for this specific version
+          const alertKey = `updateAlertShown_${latestVersion}`;
+          const alreadyShown = await AsyncStorage.getItem(alertKey);
 
-        if (!alreadyShown) {
-          Alert.alert(
-            "Update Available",
-            "A newer version of Franko Trading is available. Please update to continue.",
-            [
-              {
-                text: "Update Now",
-                onPress: () =>
-                  Linking.openURL(
-                    Platform.OS === "ios"
-                      ? "https://apps.apple.com/us/app/franko-trading/id6741319907"
-                      : "https://play.google.com/store/apps/details?id=com.poldark.mrfranky2"
-                  ),
-              },
-            ],
-            { cancelable: false }
-          );
-
-          // Mark that we showed the alert
-          await AsyncStorage.setItem("updateAlertShown", "true");
+          if (!alreadyShown) {
+            Alert.alert(
+              "Update Available",
+              `A newer version (${latestVersion}) of Franko Trading is available. Please update to continue using the latest features.`,
+              [
+                {
+                  text: "Later",
+                  style: "cancel",
+                  onPress: () => {
+                    // Mark that user chose to skip this version update
+                    AsyncStorage.setItem(alertKey, "skipped");
+                  }
+                },
+                {
+                  text: "Update Now",
+                  style: "default",
+                  onPress: () => {
+                    AsyncStorage.setItem(alertKey, "true");
+                    Linking.openURL(
+                      Platform.OS === "ios"
+                        ? "https://apps.apple.com/us/app/franko-trading/id6741319907"
+                        : "https://play.google.com/store/apps/details?id=com.poldark.mrfranky2"
+                    );
+                  },
+                },
+              ],
+              { cancelable: false }
+            );
+          }
+        } else {
+          // If user has latest version or newer, clean up old alert flags
+          const keys = await AsyncStorage.getAllKeys();
+          const updateAlertKeys = keys.filter(key => key.startsWith('updateAlertShown_'));
+          if (updateAlertKeys.length > 0) {
+            await AsyncStorage.multiRemove(updateAlertKeys);
+          }
         }
-      } else {
-        // If user has latest version, reset the flag
-        await AsyncStorage.removeItem("updateAlertShown");
+      } catch (err) {
+        console.log("Version check failed:", err);
       }
-    } catch (err) {
-      console.log("Version check failed:", err);
-    }
-  };
+    };
 
-  checkAppVersion();
-}, []);
-
+    checkAppVersion();
+  }, []);
 
   return (
+    <NavigationContainer>
+      <View style={styles.statusBarBackground} />
+      <SafeAreaView style={styles.container}>
+  
+   
+       
+        {showWelcome ? (
+          <WelcomeScreen onReady={handleReady} />
+        ) : (
+          <SafeAreaWrapper>
+            <Header />
+            <View style={styles.contentContainer}>
+              <AppStack />
+              <FloatingTawkChat />
+            </View>
+          </SafeAreaWrapper>
+        )}
+      </SafeAreaView>
+    </NavigationContainer>
+  );
+};
+
+const App = () => {
+  return (
     <Provider store={store}>
-      <NavigationContainer>
-        <View style={styles.statusBarBackground} />
-        <SafeAreaView style={styles.container}>
-          <StatusBar style="dark" translucent />
-          {showWelcome ? (
-            <WelcomeScreen onReady={handleReady} />
-          ) : (
-            <>
-              <Header />
-              <View style={styles.contentContainer}>
-                <AppStack />
-                <FloatingTawkChat />
-              </View>
-            </>
-          )}
-        </SafeAreaView>
-      </NavigationContainer>
+      <SafeAreaProvider>
+        <AppContent />
+      </SafeAreaProvider>
     </Provider>
   );
 };
@@ -217,27 +401,95 @@ const styles = StyleSheet.create({
   },
   statusBarBackground: {
     height: Platform.OS === 'android' ? RNStatusBar.currentHeight : 0,
-    backgroundColor: '#fff',
+    backgroundColor: '#10B981',
   },
   contentContainer: {
+    flex: 1,
+  },
+  safeAreaWrapper: {
     flex: 1,
   },
   welcomeContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  backgroundPattern: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  patternDot: {
+    position: 'absolute',
+    width: 4,
+    height: 4,
+    borderRadius: 2,
     backgroundColor: '#ffffff',
   },
-  logo: {
-    width: 170,
-    height: 120,
-    marginBottom: 20,
+  contentWrapper: {
+    alignItems: 'center',
+    zIndex: 1,
   },
-  welcomeText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#2c3e50',
-    marginBottom: 20,
+  logoContainer: {
+    marginBottom: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  
+  logo: {
+    width: 120,
+    height: 120,
+  },
+  textContainer: {
+    alignItems: 'center',
+    marginBottom: 40,
+  },
+  welcomeTitle: {
+    fontSize: 24,
+    fontWeight: '300',
+    color: '#ffffff',
+    marginBottom: 5,
     textAlign: 'center',
+    letterSpacing: 1,
+  },
+  companyName: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#ffffff',
+    marginBottom: 10,
+    textAlign: 'center',
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 2, height: 2 },
+    textShadowRadius: 5,
+  },
+  tagline: {
+    fontSize: 16,
+    fontWeight: '400',
+    color: 'rgba(255, 255, 255, 0.8)',
+    textAlign: 'center',
+    fontStyle: 'italic',
+  },
+  loadingContainer: {
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 15,
+    fontSize: 16,
+    color: 'rgba(255, 255, 255, 0.9)',
+    fontWeight: '400',
+  },
+  bottomWave: {
+    position: 'absolute',
+    bottom: -50,
+    left: -50,
+    right: -50,
+    height: 150,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 100,
+    transform: [{ scaleX: 1.5 }],
   },
 });

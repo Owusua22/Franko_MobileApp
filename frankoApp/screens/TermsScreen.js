@@ -64,7 +64,7 @@ const TermsScreen = () => {
  
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar backgroundColor="#10B981" barStyle="light-content" />
+
       
       {/* Custom Header */}
       <View style={styles.customHeader}>

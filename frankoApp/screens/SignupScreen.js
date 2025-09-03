@@ -720,8 +720,7 @@ const SignupScreen = ({ visible = false, onClose = () => {} }) => {
     switch (authMode) {
       case 'login':
         return "Sign in to your account";
-      case 'signup':
-        return "Join us today and enjoy exclusive benefits";
+      
       case 'guest':
         return "Quick access without creating an account";
       default:
@@ -921,7 +920,7 @@ const styles = StyleSheet.create({
   // Header styles
   header: {
     alignItems: 'center',
-    marginBottom: 15,
+    marginBottom: 5,
     position: 'relative',
   },
   closeButton: {
@@ -976,10 +975,10 @@ const styles = StyleSheet.create({
 
   // Enhanced Input Field styles
   inputContainer: {
-    marginBottom: 20,
+    marginBottom: 15,
   },
   inputLabel: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '600',
     color: '#374151',
     marginBottom: 8,
@@ -996,12 +995,12 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: '#E5E7EB',
     borderRadius: 12,
-    paddingHorizontal: 16,
+    paddingHorizontal: 10,
     paddingVertical: 14,
     fontSize: 16,
     backgroundColor: '#FFFFFF',
     color: '#111827',
-    fontWeight: '500',
+    fontWeight: '400',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,

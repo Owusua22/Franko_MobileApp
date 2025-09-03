@@ -235,15 +235,43 @@ const BrandScreen = () => {
     navigation.navigate('ProductDetails', { productId, brandId });
   };
 
+  // FIXED: Safe back navigation with fallback
+  const handleBackPress = () => {
+    try {
+      // Check if we can go back
+      if (navigation.canGoBack()) {
+        navigation.goBack();
+      } else {
+        // Fallback navigation options:
+        
+        // Option 1: Navigate to a specific screen (recommended)
+        navigation.navigate('Home'); // Replace 'Home' with your main screen name
+        
+        // Option 2: Navigate to the first screen in the stack
+        // navigation.navigate('Home', { screen: 'Home' });
+        
+        // Option 3: Reset navigation stack to a specific screen
+        // navigation.reset({
+        //   index: 0,
+        //   routes: [{ name: 'Home' }],
+        // });
+      }
+    } catch (error) {
+      console.log('Navigation error:', error);
+      // Ultimate fallback - navigate to main screen
+      navigation.navigate('Home');
+    }
+  };
+
   const handleShare = async () => {
     try {
       const brandName = selectedBrand.brandName || 'Brand';
-      const productCount = filteredProducts.length;
+
       
       const result = await Share.share({
-        message: `Check out ${brandName} on ishtari! ${productCount} amazing products available. Download the app to explore more!`,
-        title: `${brandName} - ishtari`,
-        url: 'https://ishtari.app',
+        message: `Check out ${brandName} on Franko Trading!  amazing products available. Download the app to explore more!`,
+        title: `${brandName} - Products on Franko Trading`,
+       
       });
     } catch (error) {
       Alert.alert('Error', 'Unable to share at the moment. Please try again.');
@@ -300,20 +328,20 @@ const BrandScreen = () => {
     if (selectedSeller !== '') count++;
     return count;
   };
+  
   const handleToggleWishlist = (product) => {
-  const isInWishlist = wishlistItems.some(
-    (w) => w.productID === product.productID
-  );
+    const isInWishlist = wishlistItems.some(
+      (w) => w.productID === product.productID
+    );
 
-  if (isInWishlist) {
-    dispatch(removeFromWishlist(product.productID));
-    Alert.alert("Removed", `${product.productName} removed from wishlist.`);
-  } else {
-    dispatch(addToWishlist(product));
-    Alert.alert("Added", `${product.productName} added to wishlist ❤️`);
-  }
-};
-
+    if (isInWishlist) {
+      dispatch(removeFromWishlist(product.productID));
+      Alert.alert("Removed", `${product.productName} removed from wishlist.`);
+    } else {
+      dispatch(addToWishlist(product));
+      Alert.alert("Added", `${product.productName} added to wishlist ❤️`);
+    }
+  };
 
   const renderProduct = ({ item, index }) => {
     const discount =
@@ -557,11 +585,9 @@ const BrandScreen = () => {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
-      
       {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+      <View style={styles.brandheader}>
+        <TouchableOpacity onPress={handleBackPress} style={styles.backButton}>
           <AntDesign name="arrowleft" size={24} color="#333" />
         </TouchableOpacity>
         
@@ -675,12 +701,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f8f9fa',
   },
-  header: {
+  brandheader: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingVertical: 12,
-    paddingTop: StatusBar.currentHeight + 12,
+
     backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
@@ -785,26 +810,32 @@ const styles = StyleSheet.create({
     color: '#FF6347',
     fontWeight: '600',
   },
-  productsList: {
-    padding: 8,
+  listContainer: {
+    padding: 4,
   },
-  productRow: {
-    justifyContent: 'space-between',
+  productsList: {
     paddingHorizontal: 4,
+    paddingBottom: 16,
+    paddingTop: 8,
+  },
+  row: {
+    justifyContent: "space-between",
+    paddingHorizontal: 2,
   },
   productCard: {
-    backgroundColor: "#fff",
+     backgroundColor: "#fff",
     padding: 6,
     borderRadius: 12,
-    width: 170,
+    width: 165,
     marginRight: 8,
-    marginLeft: 10,
+    marginLeft: 8,
+    overeflow: "hidden",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.9,
     shadowRadius: 2,
     elevation: 5,
     marginBottom: 20,
-    height: 240,
+    height: 240
   },
   imageContainer: {
     position: "relative",
@@ -815,6 +846,7 @@ const styles = StyleSheet.create({
     height: "100%",
     resizeMode: "contain",
   },
+ 
   newBadge: {
     position: "absolute",
     top: 8,
@@ -885,11 +917,11 @@ const styles = StyleSheet.create({
     color: "#636e72",
     textDecorationLine: "line-through",
   },
-  addToCartButton: {
+   addToCartButton: {
     position: "absolute",
-    bottom: 8,
+    bottom: 2,
     right: 8,
-    backgroundColor: "#16A34A",
+    backgroundColor: "#E63946",
     padding: 8,
     borderRadius: 20,
     shadowColor: "#000",

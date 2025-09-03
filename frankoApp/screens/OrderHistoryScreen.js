@@ -131,6 +131,9 @@ const OrderHistoryScreen = () => {
         return "#059669";
       default:
         return "#6B7280";
+        case "Wrong Number":
+        return "#EF4444";
+
     }
   };
 
@@ -147,7 +150,9 @@ const OrderHistoryScreen = () => {
       case "cancelled":
       case "canceled":
         return "cancel";
-      case "shipped":
+      case "Wrong Number":
+        return "phone-disabled";
+
       case "shipping":
         return "local-shipping";
       default:
@@ -350,9 +355,7 @@ const transformedOrders = useMemo(
 
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#f0fdf4" />
-      
+    <SafeAreaView style={styles.container}>    
       <View style={styles.headerContainer}>
         <View style={styles.header}>
           <View style={styles.headerContent}>

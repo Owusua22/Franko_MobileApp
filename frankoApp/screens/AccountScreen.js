@@ -199,7 +199,7 @@ const AccountScreen = () => {
 
   const ProfileHeader = () => (
     <View style={styles.headerContainer}>
-      <StatusBar backgroundColor="#10b981" barStyle="light-content" />
+    
       
       <TouchableOpacity 
         style={styles.backButton} 

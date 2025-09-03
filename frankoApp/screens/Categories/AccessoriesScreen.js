@@ -233,7 +233,7 @@ const AccessoriesScreen = () => {
     try {
       const result = await Share.share({
         message: 'Check out these amazing Accessories at great prices!',
-        url: 'https://your-app-link.com/Accessories', // Replace with your actual app link
+
         title: ' Accessories Collection',
       });
     } catch (error) {
@@ -588,7 +588,6 @@ const AccessoriesScreen = () => {
     </View>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -722,19 +721,20 @@ const styles = StyleSheet.create({
     color: "#666",
   },
   listContainer: {
-    padding: 8,
+    padding: 4    ,
   },
   row: {
     justifyContent: "space-between",
-    paddingHorizontal: 4,
+    paddingHorizontal: 2,
   },
   productCard: {
      backgroundColor: "#fff",
     padding: 6,
     borderRadius: 12,
-    width: 170,
+    width: 165,
     marginRight: 8,
-    marginLeft: 10,
+    marginLeft: 2,
+    overeflow: "hidden",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.9,
     shadowRadius: 2,
@@ -829,11 +829,11 @@ const styles = StyleSheet.create({
     color: "#74b9ff",
     fontWeight: "500",
   },
-  addToCartButton: {
+ addToCartButton: {
     position: "absolute",
-    bottom: 8,
+    bottom: 2,
     right: 8,
-    backgroundColor: "#16A34A",
+    backgroundColor: "#E63946",
     padding: 8,
     borderRadius: 20,
     shadowColor: "#000",
@@ -932,6 +932,5 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
 });
-
 export default AccessoriesScreen;
 

@@ -1,160 +1,31 @@
-import React, { useEffect, useState, useRef } from "react";
-import {View, Text,TouchableOpacity,
-  Image,
+import React, { useEffect, useState, useRef, useCallback } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
   ScrollView,
   StyleSheet,
-  ActivityIndicator,
-  Dimensions,
   Alert,
+  FlatList,
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigation } from "@react-navigation/native";
 import { fetchProductByShowroomAndRecord } from "../redux/slice/productSlice";
 import { addToCart } from "../redux/slice/cartSlice";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
-import { AntDesign } from "@expo/vector-icons";
-import frankoLogo from "../assets/frankoIcon.png";
-import { addToWishlist } from "../redux/wishlistSlice";
+import { ProductCard, LoadingCard } from "./ProductCard"; // Import the shared components
 
-const screenWidth = Dimensions.get("window").width;
 const DEALS_SHOWROOM_ID = "910812e9-cd1e-449a-a5bb-b74b29836569";
 const CARD_MARGIN = 8;
 const CARD_WIDTH = 170;
 
-const formatCurrency = (amount) =>
-  new Intl.NumberFormat("en-GH", {
-    style: "currency",
-    currency: "GHS",
-  }).format(amount);
-
-// Loading Card Component
-const LoadingCard = () => (
-  <View style={styles.loadingCard}>
-    <View style={styles.loadingImage}>
-      <Image source={frankoLogo} style={styles.frankoLogo} />
-    </View>
-    <View style={styles.loadingContent}>
-      <View style={styles.loadingTitle} />
-      <View style={styles.loadingPrice} />
-    </View>
-  </View>
-);
-
-// Product Card Component
-const ProductCard = ({ product, onPress, onAddToCart, isAddingToCart, index }) => {
-  const [imageLoading, setImageLoading] = useState(true);
-  const dispatch = useDispatch();
-  const wishlistItems = useSelector((state) => state.wishlist.items);
-
-  const discount = product.oldPrice > 0 
-    ? Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100)
-    : 0;
-
-  const isBestSeller = index < 3; // First 3 items are "best sellers"
-  const isInWishlist = wishlistItems.some((item) => item.productID === product.productID);
-
-  const handleWishlistPress = () => {
-    if (isInWishlist) {
-      Alert.alert("Info", `${product.productName} is already in your wishlist.`);
-    } else {
-      dispatch(addToWishlist(product));
-      Alert.alert("Success", `${product.productName} added to wishlist! ❤️`);
-    }
-  };
-
-  return (
-    <View style={styles.productCard}>
-      <TouchableOpacity
-        onPress={onPress}
-        activeOpacity={0.9}
-        style={styles.cardTouchable}
-      >
-        <View style={styles.imageContainer}>
-          {imageLoading && (
-            <View style={styles.imageLoadingContainer}>
-              <ActivityIndicator size="large" color="#10B981" />
-            </View>
-          )}
-          
-          <Image
-            source={{
-              uri: `https://smfteapi.salesmate.app/Media/Products_Images/${product.productImage
-                .split("\\")
-                .pop()}`,
-            }}
-            style={[styles.productImage, imageLoading && styles.hiddenImage]}
-            onLoad={() => setImageLoading(false)}
-            onError={() => setImageLoading(false)}
-          />
-          
-          {isBestSeller && (
-            <View style={styles.bestSellerBadge}>
-              <Text style={styles.bestSellerText}>NEW</Text>
-            </View>
-          )}
-          
-          {discount > 0 && (
-            <View style={styles.discountBadge}>
-              <Text style={styles.discountText}>SALE</Text>
-            </View>
-          )}
-
-          {/* Wishlist Button */}
-          <TouchableOpacity style={styles.wishlistButton} onPress={handleWishlistPress}>
-            <AntDesign
-              name={isInWishlist ? "heart" : "hearto"}
-              size={18}
-              color={isInWishlist ? "#EF4444" : "#6B7280"}
-            />
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.productInfo}>
-          <Text style={styles.productName} numberOfLines={2}>
-            {product.productName}
-          </Text>
-
-          <View style={styles.priceContainer}>
-            <Text style={styles.productPrice}>
-              {formatCurrency(product.price)}
-            </Text>
-            {product.oldPrice > 0 && (
-              <Text style={styles.oldPrice}>
-                {formatCurrency(product.oldPrice)}
-              </Text>
-            )}
-          </View>
-        </View>
-
-        <TouchableOpacity
-          style={[
-            styles.addToCartButton,
-            isAddingToCart && styles.addToCartButtonDisabled,
-          ]}
-          onPress={(e) => {
-            e.stopPropagation();
-            onAddToCart(product);
-          }}
-          disabled={isAddingToCart}
-        >
-          {isAddingToCart ? (
-            <ActivityIndicator size={14} color="white" />
-          ) : (
-            <AntDesign name="shoppingcart" size={14} color="white" />
-          )}
-        </TouchableOpacity>
-      </TouchableOpacity>
-    </View>
-  );
-};
-
+// Optimized Explore Component
 const Explore = () => {
   const dispatch = useDispatch();
   const navigation = useNavigation();
   const { productsByShowroom, loading } = useSelector((state) => state.products);
   const cartId = useSelector((state) => state.cart.cartId);
   const [addingToCart, setAddingToCart] = useState({});
-  const containerRef = useRef(null);
 
   const products = productsByShowroom?.[DEALS_SHOWROOM_ID] || [];
 
@@ -169,7 +40,8 @@ const Explore = () => {
     }
   }, [dispatch, products]);
 
-  const handleAddToCart = (product) => {
+  // Memoized callbacks for better performance
+  const handleAddToCart = useCallback((product) => {
     const cartData = {
       cartId,
       productId: product.productID,
@@ -193,43 +65,108 @@ const Explore = () => {
           return newState;
         });
       });
-  };
+  }, [cartId, dispatch]);
 
-  const handleProductPress = (productId) => {
+  const handleProductPress = useCallback((productId) => {
     navigation.navigate('ProductDetails', { productId });
-  };
+  }, [navigation]);
 
-  const renderProducts = () => {
-    if (loading && products.length === 0) {
-      return Array(6).fill().map((_, idx) => <LoadingCard key={idx} />);
-    }
+  const handleViewMore = useCallback(() => {
+    navigation.navigate("showroom", { showRoomID: DEALS_SHOWROOM_ID });
+  }, [navigation]);
 
-    if (products.length === 0) {
-      return Array(6).fill().map((_, idx) => <LoadingCard key={idx} />);
-    }
-
-    return products.slice(0, 10).map((product, index) => (
+  // Render item function for FlatList (memoized)
+  const renderProduct = useCallback(({ item, index }) => {
+    return (
       <ProductCard
-        key={product.productID}
-        product={product}
+        product={item}
         index={index}
-        onPress={() => handleProductPress(product.productID)}
+        onPress={handleProductPress}
         onAddToCart={handleAddToCart}
-        isAddingToCart={addingToCart[product.productID]}
+        isAddingToCart={addingToCart[item.productID]}
+        showBestSeller={true} // This will show "NEW" badge for first 3 items
       />
-    ));
-  };
+    );
+  }, [handleProductPress, handleAddToCart, addingToCart]);
+
+  // Key extractor for FlatList
+  const keyExtractor = useCallback((item) => item.productID, []);
+
+  // Get item layout for better performance
+  const getItemLayout = useCallback((data, index) => ({
+    length: CARD_WIDTH + CARD_MARGIN,
+    offset: (CARD_WIDTH + CARD_MARGIN) * index,
+    index,
+  }), []);
 
   const shouldShowViewMore = () => {
     if (loading) return false;
     return products.length > 10;
   };
 
+  // Render loading cards
+  const renderLoadingCards = () => {
+    return (
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.productList}
+      >
+        {Array(6).fill().map((_, idx) => (
+          <LoadingCard key={`loading-${idx}`} />
+        ))}
+      </ScrollView>
+    );
+  };
+
+  // Render main product list
+  const renderMainProducts = () => {
+    const displayProducts = products.slice(0, 10);
+
+    return (
+      <View>
+        <FlatList
+          data={displayProducts}
+          renderItem={renderProduct}
+          keyExtractor={keyExtractor}
+          getItemLayout={getItemLayout}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.productList}
+          decelerationRate="fast"
+          snapToInterval={CARD_WIDTH + CARD_MARGIN}
+          snapToAlignment="start"
+          removeClippedSubviews={true}
+          initialNumToRender={4}
+          maxToRenderPerBatch={6}
+          windowSize={10}
+          updateCellsBatchingPeriod={50}
+          ListFooterComponent={() => 
+            shouldShowViewMore() ? (
+              <TouchableOpacity 
+                style={styles.viewAllCard} 
+                onPress={handleViewMore}
+              >
+                <View style={styles.viewAllContent}>
+                  <Icon name="trending-up" size={32} color="#10B981" />
+                  <Text style={styles.viewAllText}>View More</Text>
+                  <Text style={styles.viewMoreSubtext}>
+                    {products.length - 10}+ more products
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            ) : null
+          }
+        />
+      </View>
+    );
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.showroomContainer}>
         {/* Modern E-commerce Header */}
-        <View style={styles.showroomHeader}>
+    <View style={styles.showroomHeader}>
           <View style={styles.headerContent}>
             <View style={styles.headerLeft}>
              <View style={styles.iconContainer}>
@@ -274,34 +211,11 @@ const Explore = () => {
           </View>
         </View>
 
-        {/* Product List */}
-        <ScrollView
-          horizontal
-          ref={containerRef}
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.productList}
-          decelerationRate="fast"
-          snapToInterval={CARD_WIDTH + CARD_MARGIN}
-          snapToAlignment="start"
-        >
-          {renderProducts()}
-          
-          {/* View More Card */}
-          {shouldShowViewMore() && (
-            <TouchableOpacity 
-              style={styles.viewAllCard} 
-              onPress={() => navigation.navigate("showroom", { showRoomID: DEALS_SHOWROOM_ID })}
-            >
-              <View style={styles.viewAllContent}>
-                <Icon name="trending-up" size={32} color="#10B981" />
-                <Text style={styles.viewAllText}>View More</Text>
-                <Text style={styles.viewMoreSubtext}>
-                  {products.length - 10}+ more products
-                </Text>
-              </View>
-            </TouchableOpacity>
-          )}
-        </ScrollView>
+        {/* Enhanced Product List with Performance Optimization */}
+        {(loading && products.length === 0) || products.length === 0
+          ? renderLoadingCards()
+          : renderMainProducts()
+        }
       </View>
     </View>
   );
@@ -318,11 +232,6 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     overflow: "hidden",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 4,
-
     marginVertical: 8,
   },
   
@@ -490,216 +399,11 @@ const styles = StyleSheet.create({
   },
   
   productList: { 
-  
     paddingRight: 10,
     paddingVertical: 20,
   },
-  
-  // Product Card Styles (maintaining original design)
-  productCard: {
-    backgroundColor: "#fff",
-    padding: 6,
-    borderRadius: 12,
-    width: 170,
-    marginRight: 8,
-    marginLeft: 10,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.9,
-    shadowRadius: 2,
-    elevation: 5,
-    marginBottom: 20,
-    height: 240
-  },
-  
-  cardTouchable: {
-    flex: 1,
-  },
-  
-  imageContainer: {
-    position: "relative",
-    height: 140,
-  },
-  
-  imageLoadingContainer: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#f8f9fa",
-    zIndex: 2,
-  },
-  
-  productImage: {
-    width: "100%",
-    height: "100%",
-    resizeMode: "contain",
-  },
-  
-  hiddenImage: {
-    opacity: 0,
-  },
-  
-  bestSellerBadge: {
-    position: "absolute",
-    top: 8,
-    left: 8,
-    backgroundColor: "#E63946",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-    zIndex: 2,
-  },
-  
-  bestSellerText: {
-    color: "white",
-    fontSize: 10,
-    fontWeight: "bold",
-  },
-  
-  discountBadge: {
-    position: "absolute",
-    top: 8,
-    right: 8,
-    backgroundColor: "#EF4444",
-    paddingHorizontal: 6,
-    paddingVertical: 3,
-    borderRadius: 8,
-    zIndex: 2,
-  },
-  
-  discountText: {
-    color: "white",
-    fontSize: 10,
-    fontWeight: "bold",
-  },
-  
-  wishlistButton: {
-    position: "absolute",
-    bottom: 8,
-    right: 8,
-    backgroundColor: "white",
-    padding: 6,
-    borderRadius: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 4,
-  },
-  
-  productInfo: {
-    padding: 12,
-    paddingBottom: 8,
-  },
-  
-  productName: {
-    fontSize: 13,
-    color: "#333",
-    fontWeight: "500",
-    lineHeight: 18,
-    marginBottom: 6,
-    minHeight: 36,
-  },
-  
-  priceContainer: {
-    flexDirection: "column",
-    gap: 2,
-    marginBottom: 8,
-  },
-  
-  productPrice: {
-    fontSize: 14,
-    color: "#2d3436",
-    fontWeight: "bold",
-  },
-  
-  oldPrice: {
-    fontSize: 10,
-    color: "#636e72",
-    textDecorationLine: "line-through",
-  },
-  
-  addToCartButton: {
-    position: "absolute",
-    bottom: 2,
-    right: 8,
-    backgroundColor: "#10B981",
-    padding: 8,
-    borderRadius: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-    elevation: 3,
-  },
-  
-  addToCartButtonDisabled: {
-    backgroundColor: "#9CA3AF",
-  },
 
-  // Loading Card Styles (matching original)
-  loadingCard: {
-    width: CARD_WIDTH,
-    marginRight: CARD_MARGIN,
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    overflow: "hidden",
-    height: 240,
-    marginBottom: 16,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 8,
-    marginLeft: 10,
-  },
-  
-  loadingImage: {
-    height: 140,
-    backgroundColor: "#f0f0f0",
-    justifyContent: "center",
-    alignItems: "center",
-    position: "relative",
-    overflow: "hidden",
-  },
-  
-  loadingContent: {
-    padding: 12,
-  },
-  
-  loadingTitle: {
-    height: 16,
-    backgroundColor: "#f0f0f0",
-    borderRadius: 4,
-    marginBottom: 8,
-    position: "relative",
-    overflow: "hidden",
-  },
-  
-  loadingPrice: {
-    height: 12,
-    width: "60%",
-    backgroundColor: "#f0f0f0",
-    borderRadius: 4,
-    position: "relative",
-    overflow: "hidden",
-  },
-  
-  frankoLogo: {
-    width: 60,
-    height: 60,
-    resizeMode: "contain",
-    opacity: 0.1,
-    tintColor: "#bbb",
-  },
-
-  // View More Card (matching original style)
+  // View More Card
   viewAllCard: {
     width: CARD_WIDTH,
     height: 240,
@@ -737,3 +441,5 @@ const styles = StyleSheet.create({
 });
 
 export default Explore;
+
+

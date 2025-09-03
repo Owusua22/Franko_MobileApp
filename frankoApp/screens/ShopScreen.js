@@ -345,7 +345,7 @@ const ShopScreen = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar backgroundColor="#5DD39E" barStyle="light-content" />
+    
       
       <KeyboardAvoidingView 
         behavior={Platform.OS === "ios" ? "padding" : "height"} 

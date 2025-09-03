@@ -19,57 +19,29 @@ const OrderCancellationScreen = () => {
   };
 
   const handleContactSupport = () => {
-    // Add your support contact logic here
-    console.log("Contact support pressed");
+    navigation.navigate("CustomerService");
   };
 
   return (
     <>
-      <StatusBar barStyle="light-content" backgroundColor="#1f2937" />
+
       <View style={styles.container}>
         {/* Header Section */}
-        <View style={styles.header}>
+        <View style={styles.cancelledheader}>
           <View style={styles.iconContainer}>
             <Text style={styles.iconText}>⚠️</Text>
           </View>
           <Text style={styles.title}>Order Cancelled</Text>
           <Text style={styles.subtitle}>
-            Your order has been successfully cancelled
+            Your payment was not successful or the order was cancelled.
           </Text>
         </View>
 
         {/* Main Content Card */}
         <View style={styles.card}>
-          {/* Status Badge */}
-          <View style={styles.statusBadge}>
-            <Text style={styles.statusText}>CANCELLED</Text>
-          </View>
+    
 
-          {/* Information Section */}
-          <View style={styles.infoSection}>
-            <Text style={styles.sectionTitle}>What happens next?</Text>
-            
-            <View style={styles.infoItem}>
-              <View style={styles.bulletPoint} />
-              <Text style={styles.infoText}>
-                Your order has been removed from our system
-              </Text>
-            </View>
-            
-            <View style={styles.infoItem}>
-              <View style={styles.bulletPoint} />
-              <Text style={styles.infoText}>
-                No charges will be applied to your payment method
-              </Text>
-            </View>
-            
-            <View style={styles.infoItem}>
-              <View style={styles.bulletPoint} />
-              <Text style={styles.infoText}>
-                You'll receive a confirmation email shortly
-              </Text>
-            </View>
-          </View>
+       
 
           {/* Divider */}
           <View style={styles.divider} />
@@ -120,10 +92,10 @@ const styles = StyleSheet.create({
     backgroundColor: "#f8fafc",
     paddingHorizontal: 20,
   },
-  header: {
+  cancelledheader: {
     alignItems: "center",
-    paddingTop: 60,
-    paddingBottom: 40,
+    paddingTop: 10,
+    paddingBottom: 10,
   },
   iconContainer: {
     width: 80,

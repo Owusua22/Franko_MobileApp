@@ -8,7 +8,6 @@ import {
   StyleSheet,
   TouchableOpacity,
   SafeAreaView,
-  StatusBar,
   Share,
   Alert,
   Platform,
@@ -19,6 +18,7 @@ import {
   updateCartItem,
   deleteCartItem,
 } from "../redux/slice/cartSlice";
+import { removeFromWishlist, addToWishlist } from "../redux/wishlistSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
@@ -28,6 +28,7 @@ const CartScreen = () => {
   const dispatch = useDispatch();
   const navigation = useNavigation();
   const { cartItems, loading } = useSelector((state) => state.cart);
+  const wishlistItems = useSelector((state) => state.wishlist.items);
   const [deleting, setDeleting] = useState(false);
   const [showSignupModal, setShowSignupModal] = useState(false);
 
@@ -62,6 +63,38 @@ const CartScreen = () => {
     await dispatch(deleteCartItem({ cartId, productId }));
     dispatch(getCartById(cartId));
     setDeleting(false);
+  };
+
+  // Wishlist toggle functionality
+  const handleToggleWishlist = (item) => {
+    const isInWishlist = wishlistItems.some(
+      (w) => w.productID === item.productId
+    );
+
+    // Create product object with the structure expected by wishlist
+    const productForWishlist = {
+      productID: item.productId,
+      productName: item.productName,
+      price: item.price,
+      productImage: item.imagePath,
+      // Add any other fields that might be needed
+      brandName: item.brandName || "",
+      categoryName: item.categoryName || "",
+      sellerName: item.sellerName || "",
+    };
+
+    if (isInWishlist) {
+      dispatch(removeFromWishlist(item.productId));
+      Alert.alert("Removed", `${item.productName} removed from wishlist.`);
+    } else {
+      dispatch(addToWishlist(productForWishlist));
+      Alert.alert("Added", `${item.productName} added to wishlist ❤️`);
+    }
+  };
+
+  // Check if item is in wishlist
+  const isItemInWishlist = (productId) => {
+    return wishlistItems.some((item) => item.productID === productId);
   };
 
   const calculateSubtotal = () =>
@@ -127,7 +160,7 @@ const CartScreen = () => {
       const result = await Share.share(shareContent);
     } catch (error) {
       console.error('Error sharing cart:', error);
-      Alert.alert('Error', 'Unable to share cart. Please try again.');
+
     }
   };
 
@@ -135,6 +168,8 @@ const CartScreen = () => {
     const imageUrl = item.imagePath
       ? `${backendBaseURL}/Media/Products_Images/${item.imagePath.split("\\").pop()}`
       : null;
+
+    const inWishlist = isItemInWishlist(item.productId);
 
     return (
       <View style={styles.cartItem}>
@@ -186,8 +221,19 @@ const CartScreen = () => {
         </View>
 
         <View style={styles.itemActions}>
-          <TouchableOpacity style={styles.actionButton} activeOpacity={0.7}>
-            <MaterialIcons name="favorite-border" size={18} color="#9CA3AF" />
+          <TouchableOpacity 
+            style={[
+              styles.actionButton, 
+              inWishlist && styles.wishlistButtonActive
+            ]} 
+            onPress={() => handleToggleWishlist(item)}
+            activeOpacity={0.7}
+          >
+            <MaterialIcons 
+              name={inWishlist ? "favorite" : "favorite-border"} 
+              size={18} 
+              color={inWishlist ? "#EF4444" : "#9CA3AF"} 
+            />
           </TouchableOpacity>
           
           <TouchableOpacity
@@ -215,10 +261,10 @@ const CartScreen = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+
       
       {/* Enhanced Header */}
-      <View style={styles.header}>
+      <View style={styles.Cartheader}>
         <TouchableOpacity 
           style={styles.headerButton}
           onPress={() => navigation.goBack()}
@@ -328,6 +374,7 @@ const CartScreen = () => {
   );
 };
 
+
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
@@ -335,7 +382,7 @@ const styles = StyleSheet.create({
     paddingBottom: 20
 
   },
-  header: {
+  Cartheader: {
     flexDirection: "row",
     alignItems : "center",
     justifyContent: "space-between",

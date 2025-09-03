@@ -14,7 +14,11 @@ const PaymentGatewayScreen = ({ route, navigation }) => {
         {
           text: "Yes",
           onPress: () => {
-            navigation.goBack();
+            navigation.navigate("CheckoutScreen", {
+              fromPayment: true,
+              paymentCancelled: true,
+            
+            });
           },
         },
       ]);
@@ -26,7 +30,7 @@ const PaymentGatewayScreen = ({ route, navigation }) => {
 
   const handleNavigationStateChange = (navState) => {
     const { url } = navState;
-    console.log("Navigated to URL:", url); // Debugging
+
 
     if (url.includes("order-success")) {
       Alert.alert("Success", "Payment was successful!");
@@ -37,7 +41,7 @@ const PaymentGatewayScreen = ({ route, navigation }) => {
     } else if (url.includes("order-history")) {
       console.log("Callback URL triggered:", url);
     } else {
-      console.log("Unhandled URL:", url);
+
     }
   };
 

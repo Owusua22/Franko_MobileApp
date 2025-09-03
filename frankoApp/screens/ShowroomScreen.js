@@ -255,7 +255,7 @@ const ShowroomScreen = () => {
     try {
       const result = await Share.share({
         message: `Check out amazing products from ${displayShowroomName} showroom!`,
-        url: 'https://your-app-link.com/showroom', // Replace with your actual app link
+       
         title: `${displayShowroomName} Products`,
       });
     } catch (error) {
@@ -679,32 +679,26 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-  
+    backgroundColor: "white",
     paddingHorizontal: 12,
-    paddingVertical: 12,
-    paddingTop: 15,
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
-    shadowColor: "#000",
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 5,
+    paddingVertical: 2,
+    paddingTop: 5,
+    borderBottomWidth: 1,
+    borderBottomColor: "#e0e0e0",
   },
   backButton: {
     padding: 4,
-    
   },
   headerTitle: {
     fontSize: 18,
     fontWeight: "600",
-
+    color: "black",
     flex: 1,
     textAlign: "center",
     marginHorizontal: 16,
   },
   headerActions: {
     flexDirection: "row",
-    alignItems: "center",
     gap: 12,
   },
   headerActionButton: {
@@ -809,25 +803,26 @@ const styles = StyleSheet.create({
     color: "#666",
   },
   listContainer: {
-    padding: 8,
+    padding: 4    ,
   },
   row: {
     justifyContent: "space-between",
-    paddingHorizontal: 4,
+    paddingHorizontal: 2,
   },
   productCard: {
-    backgroundColor: "#fff",
+     backgroundColor: "#fff",
     padding: 6,
     borderRadius: 12,
-    width: 170,
+    width: 165,
     marginRight: 8,
-    marginLeft: 10,
+    marginLeft: 2,
+    overeflow: "hidden",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.9,
     shadowRadius: 2,
     elevation: 5,
     marginBottom: 20,
-    height: 240,
+    height: 240
   },
   imageContainer: {
     position: "relative",
@@ -910,10 +905,10 @@ const styles = StyleSheet.create({
   },
   addToCartButton: {
     position: "absolute",
-    bottom: 8,
-    right: 4,
-    backgroundColor: "#16A34A",
-    padding: 4,
+    bottom: 2,
+    right: 8,
+    backgroundColor: "#E63946",
+    padding: 8,
     borderRadius: 20,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },

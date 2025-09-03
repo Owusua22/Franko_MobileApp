@@ -4,12 +4,12 @@
     "slug": "Franko",
     "version": "57.0.1",
     "orientation": "default",
-    "icon": "./assets/frankologo.png",
+    "icon": "./assets/frankologo.jpg",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "developmentClient": false,
     "splash": {
-      "image": "./assets/frankologo.png",
+      "image": "./assets/frankologo.jpg",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -22,14 +22,16 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/frankologo.png",
+        "foregroundImage": "./assets/frankologo.jpg",
         "backgroundColor": "#ffffff"
       },
       "package": "com.poldark.mrfranky2",
-      "targetSdkVersion": 34
+      "compileSdkVersion": 35,
+      "targetSdkVersion": 35,
+      "buildToolsVersion": "35.0.0"
     },
     "web": {
-      "favicon": "./assets/frankologo.png"
+      "favicon": "./assets/frankologo.jpg"
     },
     "updates": {
       "enabled": true,
@@ -45,7 +47,9 @@
     },
     "owner": "franko_dev-2",
     "plugins": [
-      "expo-asset"
+      "expo-asset",
+      "expo-localization",
+      "expo-updates"
     ]
   }
 }
